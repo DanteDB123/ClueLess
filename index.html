@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+  <head>
+    <title>ClueLess</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="node_modules/custombox/src/css/custombox.css">
+    <script src="//cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="/node_modules/custombox/src/js/custombox.js"></script>
+    <script src="Player.js"></script>
+  </head>
+  <body>
+    <div id="loginModal" style="display:none;">
+    <form id="loginForm" action="">
+      <input id="nameInput" required/>
+      <select id="characterSelect" name="character">
+        <option value="Colonel Mustard">Colonel Mustard</option>
+        <option value="Miss Scarlet">Miss Scarlet</option>
+        <option value="Professor Plum">Professor Plum</option>
+        <option value="Mr Green">Mr. Green</option>
+        <option value="Mrs White">Mrs. White</option>
+        <option value="Mrs Peacock">Mrs. Peacock</option>
+      </select>
+      <input type="submit" value="Login">
+    </form>
+    </div>
+
+    <div id="mainContainer">
+      <div class="gameBoardContainer">
+        <canvas id="gameBoard"></canvas>
+        <img id="background" src="/public/gameBoard.png" alt="ClueLess Game Board">
+      </div>
+      <div class="chatContainer">
+      <ul id="messages"></ul>
+      <form id="chatForm" action="">
+        <input id="messageInput" autocomplete="off" required/>
+        <button class="submitMessage">Send</button>
+      </form>
+      </div>
+      <br syle="lineBreak"/>
+    </div>
+    <script>
+    //Instantiate the player object
+    var player = Player.getPlayer();
+
+    //Execute when the document and jQuery are ready
+    $(function(){
+      //Instantiate the socket object
+      var socket = io();
+
+      console.log(player);
+
+      initiateLogin();
+      initiateGameBoard();
+    
+      /**
+      *Handles submit of the chat form
+      **/
+      $('form#chatForm').submit(function(){
+        socket.emit('message', $('#messageInput').val());
+        $('#messageInput').val('');
+        return false;
+      });
+
+      /**
+      *Handles submit of login form
+      **/
+      $('form#loginForm').submit(function(){
+        socket.emit('login', $('input#nameInput').val(), $('select#characterSelect option:selected').val());
+        //send player as callback
+        Custombox.close();
+        return false;
+      });
+
+      /**
+      *Socket listener for server-sent event chatMessage
+      **/
+      socket.on('chatMessage', function(player, msg){
+        $('#messages').append($('<li>').text(player.name + ' : ' + msg));
+        window.scrollTo(0,document.body.scrollHeight);
+      });
+
+      /**
+      *Socket listener for server-sent event playerLogin
+      **/
+      socket.on('playerLogin', function(name, character){
+        $('#messages').append($('<li>').text(name + " has logged in as " + character));
+        window.scrollTo(0,document.body.scrollHeight);
+      });
+    });
+
+    /**
+    *Creates the login screen and displays it to the user upon startup
+    **/
+    function initiateLogin() {
+      if(!player || !Player.getPlayer() || !Player.getPlayer().playerId){
+        Custombox.open({
+            target: '#loginModal',
+            effect: 'fadein',
+            escKey: false,
+            overlayClose: false,
+        });
+      }
+    }
+
+    /**
+    *Create the Game Board
+    **/
+    function initiateGameBoard () {
+      var canvas = document.getElementById('gameBoard');
+      var context = canvas.getContext('2d');
+      var background = document.getElementById('background');
+      context.drawImage(background, 0, 0, background.width, background.height, 0, 0, canvas.width, canvas.height);
+    }
+
+    </script>
+  </body>
+</html>
