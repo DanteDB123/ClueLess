@@ -6,31 +6,64 @@
     <link rel="stylesheet" type="text/css" href="node_modules/custombox/src/css/custombox.css">
     <script src="//cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="/node_modules/custombox/src/js/custombox.js"></script>
     <script src="Player.js"></script>
   </head>
   <body>
-    <div id="loginModal" style="display:none;">
+    <div id="loginModal" class="flex-container">
     <form id="loginForm" action="">
-      <input id="nameInput" required/>
+      <input id="nameInput" required/><br>
       <select id="characterSelect" name="character">
-        <option value="Colonel Mustard">Colonel Mustard</option>
-        <option value="Miss Scarlet">Miss Scarlet</option>
-        <option value="Professor Plum">Professor Plum</option>
-        <option value="Mr Green">Mr. Green</option>
-        <option value="Mrs White">Mrs. White</option>
-        <option value="Mrs Peacock">Mrs. Peacock</option>
-      </select>
+        <option value="Professor Schappelle">Professor Schappelle</option>
+        <option value="Professor Demasco">Professor Demasco</option>
+        <option value="Professor Garonzik">Professor Garonzik</option>
+        <option value="Mr. Brock">Mr. Brock</option>
+        <option value="Dean Schlesinger">Dean Schlesinger</option>
+      </select><br>
       <input type="submit" value="Login">
     </form>
     </div>
 
     <div id="mainContainer">
-      <div class="gameBoardContainer">
-        <canvas id="gameBoard"></canvas>
-        <img id="background" src="/public/gameBoard.png" alt="ClueLess Game Board">
+      <div id="gameBoardContainer" class="flex-container">
+        <div id="gameColumn1" class="gameBoardColumn">
+        <canvas id="gameBoard1-1" class="room"></canvas>
+        <canvas id="gameBoard2-1"></canvas>
+        <canvas id="gameBoard3-1" class="room"></canvas>
+        <canvas id="gameBoard4-1"></canvas>
+        <canvas id="gameBoard5-1" class="room"></canvas>
+        </div>
+        <div id="gameColumn2" class="gameBoardColumn">
+        <canvas id="gameBoard1-2"></canvas>
+        <canvas id="gameBoard2-2"></canvas>
+        <canvas id="gameBoard3-2"></canvas>
+        <canvas id="gameBoard4-2"></canvas>
+        <canvas id="gameBoard5-2"></canvas>
+        </div>
+        <div id="gameColumn3" class="gameBoardColumn">
+        <canvas id="gameBoard1-3" class="room"></canvas>
+        <canvas id="gameBoard2-3"></canvas>
+        <canvas id="gameBoard3-3" class="room"></canvas>
+        <canvas id="gameBoard4-3"></canvas>
+        <canvas id="gameBoard5-3" class="room"></canvas>
+        </div>
+        <div id="gameColumn4" class="gameBoardColumn">
+        <canvas id="gameBoard1-4"></canvas>
+        <canvas id="gameBoard2-4"></canvas>
+        <canvas id="gameBoard3-4"></canvas>
+        <canvas id="gameBoard4-4"></canvas>
+        <canvas id="gameBoard5-4"></canvas>
+        </div>
+        <div id="gameColumn5" class="gameBoardColumn">
+        <canvas id="gameBoard1-5" class="room"></canvas>
+        <canvas id="gameBoard2-5"></canvas>
+        <canvas id="gameBoard3-5" class="room"></canvas>
+        <canvas id="gameBoard4-5"></canvas>
+        <canvas id="gameBoard5-5" class="room"></canvas>
+        </div>
       </div>
-      <div class="chatContainer">
+      <div id="chatContainer"  class="flex-container">
       <ul id="messages"></ul>
       <form id="chatForm" action="">
         <input id="messageInput" autocomplete="off" required/>
@@ -51,7 +84,7 @@
       console.log(player);
 
       initiateLogin();
-      initiateGameBoard();
+      //initiateGameBoard();
     
       /**
       *Handles submit of the chat form
@@ -84,9 +117,17 @@
       *Socket listener for server-sent event playerLogin
       **/
       socket.on('playerLogin', function(name, character){
+        $('#loginModal').addClass('noDisplay');
         $('#messages').append($('<li>').text(name + " has logged in as " + character));
-        window.scrollTo(0,document.body.scrollHeight);
+        window.scrollTo(0, document.body.scrollHeight);
+        $('div#gameBoardContainer').prepend($('<character class="draggable">').text(character));
+        setDraggableCharacters();
       });
+
+      /**
+      *Socket listener for server-sent event updateCharacterPosition
+      **/
+
     });
 
     /**
@@ -104,15 +145,41 @@
     }
 
     /**
-    *Create the Game Board
+    *Allow the current player to drag their character
     **/
+    function setDraggableCharacters() {
+      $( ".draggable" ).draggable({
+        containment: "#gameBoardContainer",
+        snap: "canvas.room",
+        snapMode: "inner",
+        revert: true,
+        handle: ""
+      });
+    }
+
+    /**
+    *Create the Game Board
+    Deprecated - remove
     function initiateGameBoard () {
       var canvas = document.getElementById('gameBoard');
       var context = canvas.getContext('2d');
-      var background = document.getElementById('background');
-      context.drawImage(background, 0, 0, background.width, background.height, 0, 0, canvas.width, canvas.height);
+      resizeGameBoard();
     }
 
+    function resizeGameBoard(){
+      //Get the canvas and context 
+      var c = $('canvas[id*=gameBoard]');
+      var ct = c.get(0).getContext('2d');
+      var container = $('div#gameBoardContainer');
+
+      //Run function for each gamBoard canvas when browser resizes
+      $.each(c, function(i, val){
+        $(window).resize((function(){ 
+        c.attr('width', $(container).width() ); //max width
+        c.attr('height', $(container).height() ); //max height
+        })());
+      });
+    }*/
     </script>
   </body>
 </html>

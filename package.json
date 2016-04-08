@@ -1,18 +1,15 @@
 {
-  "name": "clueless",
-  "version": "1.0.0",
+  "name": "ClueLess",
+  "version": "1.0",
   "author": "Dante De Benedictis",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js"
-  },
   "dependencies": {
     "custombox": "^3.0.2",
     "express": "^4.10.2",
     "gulp": "^3.9.1",
     "socket.io": "^1.4.5"
   },
-    "engines": {
-    "node": "0.12.7"
-  }
+  "scripts": {
+    "start": "node app.js"
+  },
+  "main": "app.js"
 }
