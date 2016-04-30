@@ -55,6 +55,23 @@ div#chatContainer{
 #gameBoardContainer canvas.room {
 	background: url("/img/gameBoard.png");
   	background-size: 100% 100%;
+  	opacity: .80;
+}
+
+#gameBoardContainer canvas.hallway.horizontal{
+	background: url("/img/hallway-horizontal.png");
+	background-size: 100% 50%;
+	background-position: center;
+  	background-repeat: no-repeat;
+  	opacity: .75;
+}
+
+#gameBoardContainer canvas.hallway.vertical{
+	background: url("/img/hallway-vertical.png");
+	background-size: 50% 100%;
+	background-position: center;
+  	background-repeat: no-repeat;
+  	opacity: .75;
 }
 
 form#chatForm {
@@ -119,10 +136,12 @@ input#messageInput {
 character{
 	position: absolute;
     display: inline-flex;
-	width: 20%;
-	height: 10%;
+	width: 20% !important;
+	height: 15% !important;
   	z-index: 3;
   	font-size: 100%;
+  	vertical-align: middle;
+    text-align: center;
 }
 .gameBoardColumn{
 	display: inline-block;

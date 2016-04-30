@@ -4,19 +4,21 @@
  * @module src/Player
  */
 
-var Player = (function(){
+var Player = (function(nameAttr, characterAttr){
     var name;
     var character;
     var playerId = 0;
 
+    debugger;
+    
     /**
     * Player Construtor
     * @param {String} name - name of the player
     * @param {Character} character - the Character the player will be
     **/
-    var player = function (name, character) {
-        this.name = name;
-        this.character = character;
+    var player = function (nameAttr, characterAttr) {
+        this.name = nameAttr;
+        this.character = characterAttr;
         this.playerId = playerId++;
     };
 

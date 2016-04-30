@@ -8,7 +8,6 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="/node_modules/custombox/src/js/custombox.js"></script>
-    <script src="Player.js"></script>
   </head>
   <body>
     <div id="loginModal" class="flex-container">
@@ -20,6 +19,7 @@
         <option value="Professor Garonzik">Professor Garonzik</option>
         <option value="Mr. Brock">Mr. Brock</option>
         <option value="Dean Schlesinger">Dean Schlesinger</option>
+        <option value="Asst Dean Horn">Asst Dean Horn</option>
       </select><br>
       <input type="submit" value="Login">
     </form>
@@ -28,39 +28,39 @@
     <div id="mainContainer">
       <div id="gameBoardContainer" class="flex-container">
         <div id="gameColumn1" class="gameBoardColumn">
-        <canvas id="gameBoard1-1" class="room"></canvas>
-        <canvas id="gameBoard2-1"></canvas>
-        <canvas id="gameBoard3-1" class="room"></canvas>
-        <canvas id="gameBoard4-1"></canvas>
-        <canvas id="gameBoard5-1" class="room"></canvas>
+          <canvas id="Study" class="room"></canvas>
+          <canvas id="Study_Library" class="hallway vertical"></canvas>
+          <canvas id="Library" class="room"></canvas>
+          <canvas id="Library_Conservatory" class="hallway vertical"></canvas>
+          <canvas id="Conservatory" class="room"></canvas>
         </div>
         <div id="gameColumn2" class="gameBoardColumn">
-        <canvas id="gameBoard1-2"></canvas>
-        <canvas id="gameBoard2-2"></canvas>
-        <canvas id="gameBoard3-2"></canvas>
-        <canvas id="gameBoard4-2"></canvas>
-        <canvas id="gameBoard5-2"></canvas>
+          <canvas id="Study_Hall" class="hallway horizontal"></canvas>
+          <canvas></canvas>
+          <canvas id="Library_Billiard" class="hallway horizontal"></canvas>
+          <canvas></canvas>
+          <canvas id="Conservatory_Ballroom" class="hallway horizontal"></canvas>
         </div>
         <div id="gameColumn3" class="gameBoardColumn">
-        <canvas id="gameBoard1-3" class="room"></canvas>
-        <canvas id="gameBoard2-3"></canvas>
-        <canvas id="gameBoard3-3" class="room"></canvas>
-        <canvas id="gameBoard4-3"></canvas>
-        <canvas id="gameBoard5-3" class="room"></canvas>
+          <canvas id="Hall" class="room"></canvas>
+          <canvas id="Hall_Billiard" class="hallway vertical"></canvas>
+          <canvas id="Billiard" class="room"></canvas>
+          <canvas id="Billiard_Ballroom" class="hallway vertical"></canvas>
+          <canvas id="Ballroom" class="room"></canvas>
         </div>
         <div id="gameColumn4" class="gameBoardColumn">
-        <canvas id="gameBoard1-4"></canvas>
-        <canvas id="gameBoard2-4"></canvas>
-        <canvas id="gameBoard3-4"></canvas>
-        <canvas id="gameBoard4-4"></canvas>
-        <canvas id="gameBoard5-4"></canvas>
+          <canvas id="Hall_Lounge" class="hallway horizontal"></canvas>
+          <canvas></canvas>
+          <canvas id="Billiard_Dining" class="hallway horizontal"></canvas>
+          <canvas></canvas>
+          <canvas id="Ballroom_Kitchen" class="hallway horizontal"></canvas>
         </div>
         <div id="gameColumn5" class="gameBoardColumn">
-        <canvas id="gameBoard1-5" class="room"></canvas>
-        <canvas id="gameBoard2-5"></canvas>
-        <canvas id="gameBoard3-5" class="room"></canvas>
-        <canvas id="gameBoard4-5"></canvas>
-        <canvas id="gameBoard5-5" class="room"></canvas>
+          <canvas id="Lounge" class="room"></canvas>
+          <canvas id="Lounge_Dining" class="hallway vertical"></canvas>
+          <canvas id="Dining" class="room"></canvas>
+          <canvas id="Dining_Kitchen" class="hallway vertical"></canvas>
+          <canvas id="Kitchen" class="room"></canvas>
         </div>
       </div>
       <div id="chatContainer"  class="flex-container">
@@ -74,14 +74,13 @@
     </div>
     <script>
     //Instantiate the player object
-    var player = Player.getPlayer();
+    //var player = Player.getPlayer();
+    var Player;
 
     //Execute when the document and jQuery are ready
     $(function(){
       //Instantiate the socket object
       var socket = io();
-
-      console.log(player);
 
       initiateLogin();
       //initiateGameBoard();
@@ -100,7 +99,6 @@
       **/
       $('form#loginForm').submit(function(){
         socket.emit('login', $('input#nameInput').val(), $('select#characterSelect option:selected').val());
-        //send player as callback
         Custombox.close();
         return false;
       });
@@ -109,63 +107,102 @@
       *Socket listener for server-sent event chatMessage
       **/
       socket.on('chatMessage', function(player, msg){
-        $('#messages').append($('<li>').text(player.name + ' : ' + msg));
-        window.scrollTo(0,document.body.scrollHeight);
+        displayChatMessage(player.name + ' : ' + msg);
       });
 
       /**
       *Socket listener for server-sent event playerLogin
       **/
-      socket.on('playerLogin', function(name, character){
+      socket.on('playerLogin', function(player){
+        var validSnap = true;
+        Player = player;
         $('#loginModal').addClass('noDisplay');
-        $('#messages').append($('<li>').text(name + " has logged in as " + character));
-        window.scrollTo(0, document.body.scrollHeight);
-        $('div#gameBoardContainer').prepend($('<character class="draggable">').text(character));
-        setDraggableCharacters();
-      });
+        createCharacterNode(Player.character);
+
+        //Allows player to drag character
+        $('character[id="' + Player.character + '"]').addClass('draggable');
+        $('character[id="' + Player.character + '"]').draggable({
+          containment: "#gameBoardContainer",
+          snap: "canvas.room",
+          stop: function (event, ui) {
+            var snapped = $(this).data('ui-draggable').snapElements;
+
+            /* Pull out only the snap targets that are "snapping": */
+            var snappedTo = $.map(snapped, function(element) {
+                return element.snapping ? element.item : null;
+            });
+
+            var snappedObject = snappedTo[0];
+
+            if(snappedObject){
+              validSnap = true;
+              socket.emit('moveTo', Player.character, snappedObject.id);
+            }
+            else{
+              validSnap = false;
+            }  
+          },
+          revert: "invalid"
+        });
+
+          socket.emit('triggerUpdate');
+        });
 
       /**
-      *Socket listener for server-sent event updateCharacterPosition
+      *Socket listener for server-sent event updateBoard
       **/
+      socket.on('updateBoard', function(playerData){
+        console.log('updating the game board');
+        updateGameBoard(playerData);
+      });
 
     });
+
+    /**
+    *Creates the input character node and adds it to the board
+    **/
+    function createCharacterNode(character) { 
+      displayChatMessage(character + ' has been added to the board');
+      $('div#gameBoardContainer').prepend($('<character id="' + character +'"">').text(character));
+    }
 
     /**
     *Creates the login screen and displays it to the user upon startup
     **/
     function initiateLogin() {
-      if(!player || !Player.getPlayer() || !Player.getPlayer().playerId){
+      //if(!Player || !Player.getPlayer() || !Player.getPlayer().playerId){
         Custombox.open({
             target: '#loginModal',
             effect: 'fadein',
             escKey: false,
             overlayClose: false,
         });
-      }
+      //}
     }
 
     /**
-    *Allow the current player to drag their character
-    **/
-    function setDraggableCharacters() {
-      $( ".draggable" ).draggable({
-        containment: "#gameBoardContainer",
-        snap: "canvas.room",
-        snapMode: "inner",
-        revert: true,
-        handle: ""
-      });
+    *Update the location of the characters on the game board
+    */
+    function updateGameBoard (playerData) {
+      $.each(playerData, function(i, player){
+          if($('character[id="' + player.character+'"]').length == 0){
+            createCharacterNode(player.character);
+          }
+          var position = $('#' + player.location).position();        
+          $('character[id="' + player.character +'"]').css({'top': position.top, 'left':position.left});
+        });
     }
 
     /**
-    *Create the Game Board
-    Deprecated - remove
-    function initiateGameBoard () {
-      var canvas = document.getElementById('gameBoard');
-      var context = canvas.getContext('2d');
-      resizeGameBoard();
+    *Display the input message in the chat window
+    */
+    function displayChatMessage (msg) {
+      $('#messages').append($('<li>').text(msg));
+      window.scrollTo(0, document.body.scrollHeight);
     }
 
+
+    /*
     function resizeGameBoard(){
       //Get the canvas and context 
       var c = $('canvas[id*=gameBoard]');
