@@ -73,17 +73,11 @@
       <br syle="lineBreak"/>
     </div>
     <script>
-    //Instantiate the player object
-    //var player = Player.getPlayer();
-    var Player;
 
     //Execute when the document and jQuery are ready
     $(function(){
       //Instantiate the socket object
       var socket = io();
-
-      initiateLogin();
-      //initiateGameBoard();
     
       /**
       *Handles submit of the chat form
@@ -106,8 +100,8 @@
       /**
       *Socket listener for server-sent event chatMessage
       **/
-      socket.on('chatMessage', function(player, msg){
-        displayChatMessage(player.name + ' : ' + msg);
+      socket.on('playerConnection', function(playerData){
+        initiateLogin(playerData);
       });
 
       /**
@@ -115,16 +109,16 @@
       **/
       socket.on('playerLogin', function(player){
         var validSnap = true;
-        Player = player;
         $('#loginModal').addClass('noDisplay');
-        createCharacterNode(Player.character);
+        createCharacterNode(player.character);
 
         //Allows player to drag character
-        $('character[id="' + Player.character + '"]').addClass('draggable');
-        $('character[id="' + Player.character + '"]').draggable({
+        $('character[id="' + player.character + '"]').addClass('draggable');
+        $('character[id="' + player.character + '"]').draggable({
           containment: "#gameBoardContainer",
           snap: "canvas.room",
           stop: function (event, ui) {
+            //debugger;
             var snapped = $(this).data('ui-draggable').snapElements;
 
             /* Pull out only the snap targets that are "snapping": */
@@ -136,7 +130,7 @@
 
             if(snappedObject){
               validSnap = true;
-              socket.emit('moveTo', Player.character, snappedObject.id);
+              socket.emit('moveTo', player.character, snappedObject.id);
             }
             else{
               validSnap = false;
@@ -156,6 +150,20 @@
         updateGameBoard(playerData);
       });
 
+      /**
+      *Socket listener for server-sent event removePlayer
+      **/
+      socket.on('removePlayer', function(player){
+        console.log('removing ' + player.character + ' from the game board');
+        removePlayer(player);
+      });
+
+      /**
+      *Socket listener for server-sent event chatMessage
+      **/
+      socket.on('chatMessage', function(player, msg){
+        displayChatMessage(player.name + ' : ' + msg);
+      });
     });
 
     /**
@@ -169,15 +177,26 @@
     /**
     *Creates the login screen and displays it to the user upon startup
     **/
-    function initiateLogin() {
-      //if(!Player || !Player.getPlayer() || !Player.getPlayer().playerId){
-        Custombox.open({
+    function initiateLogin(playerData) {
+        if(playerData && playerData.length == 6){
+          $('#loginModal').addClass('noDisplay');
+          alert('The game room is currently full');
+        }
+
+        else {
+          if(playerData){
+            //removes unavailable characters from dropdown nmenu
+            for(var i=0; i < playerData.length; i++){
+              $('select#characterSelect option[value="' + playerData[i].character + '"]').remove();
+            }
+          }
+          Custombox.open({
             target: '#loginModal',
             effect: 'fadein',
             escKey: false,
             overlayClose: false,
-        });
-      //}
+          });
+        }
     }
 
     /**
@@ -194,29 +213,21 @@
     }
 
     /**
+    *Removes the player from the game board
+    */
+    function removePlayer (player) {
+        if($('character[id="' + player.character+'"]').length > 0){
+          $('character[id="' + player.character+'"]').remove();
+        }
+    }
+
+    /**
     *Display the input message in the chat window
     */
     function displayChatMessage (msg) {
       $('#messages').append($('<li>').text(msg));
       window.scrollTo(0, document.body.scrollHeight);
     }
-
-
-    /*
-    function resizeGameBoard(){
-      //Get the canvas and context 
-      var c = $('canvas[id*=gameBoard]');
-      var ct = c.get(0).getContext('2d');
-      var container = $('div#gameBoardContainer');
-
-      //Run function for each gamBoard canvas when browser resizes
-      $.each(c, function(i, val){
-        $(window).resize((function(){ 
-        c.attr('width', $(container).width() ); //max width
-        c.attr('height', $(container).height() ); //max height
-        })());
-      });
-    }*/
     </script>
   </body>
 </html>

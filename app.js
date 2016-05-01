@@ -12,9 +12,10 @@ var io = require('socket.io')(http);
 var SERVER_PORT = process.env.OPENSHIFT_NODEJS_PORT || 3333;
 var SERVER_IP_ADDRESS = process.env.OPENSHIFT_NODEJS_IP;
 
+//Declare the debug mode variable
+var debug = true;
+
 var playerData = [];
-
-
 var locationData = {
 	Study : {
 		validMoves : ['Study_Hall', 'Study_Library', 'Kitchen']
@@ -81,11 +82,9 @@ var locationData = {
 		}
 }
 
-//Declare the debug mode variable
-var debug = true;
-
 io.on('connection', function(socket){
   print('a user connected');
+  socket.emit('playerConnection', playerData);
 
   socket.on('message', function(msg){
 	print('message from ' + socket.player.name + ' : ' + msg);
@@ -116,21 +115,38 @@ io.on('connection', function(socket){
   });
 
   socket.on('disconnect', function(){
-  	if(socket.player)
+  	if(socket.player){
 		print(socket.player.name + ' disconnected');
+		for(var i = playerData.length-1; i >= 0; i--){
+			if(playerData[i].id == socket.player.id)
+				playerData.splice(i, 1);
+		}
+		io.sockets.emit('removePlayer', socket.player);
+  	}
   });
 });
 
-app.use(express.static('./'));
+app.use('/', express.static('./'));
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
-
 });
 
 http.listen(SERVER_PORT, SERVER_IP_ADDRESS, function () {
   print( 'Listening on ' + (SERVER_IP_ADDRESS ? SERVER_IP_ADDRESS : 'localhost') + ':' + SERVER_PORT );
 });
+
+/**
+*Updates playerData object with input player data
+*@param {object} data - the player data to be updated
+*/
+function updatePlayerData(data){
+	for(var i in playerData){
+		if(playerData[i].id == data.id){
+			playerData[i] = data;
+		}
+	}
+}
 
 /**
 *Prints input message to the console
@@ -148,22 +164,10 @@ function print(msg, error){
 	}
 }
 
-/**
-*Updates playerData object with input player data
-*@param {object} data - the player data to be updated
-*/
-function updatePlayerData(data){
-	for(var i in playerData){
-		if(playerData[i].id == data.id){
-			playerData[i] = data;
-		}
-	}
-}
-
 var Player = (function(){
     var name;
     var character;
-    var id = 0;
+    var id;
     var location;
 
     /**
@@ -174,7 +178,7 @@ var Player = (function(){
     var player = function (name, character) {
         this.name = name;
         this.character = character;
-        this.id = id++;
+        this.id = playerData.length;
 
         if(character == 'Professor Schappelle')
         		this.location = 'Hall_Lounge';
@@ -188,7 +192,6 @@ var Player = (function(){
         		this.location = 'Library_Conservatory';
         else if(character == 'Asst Dean Horn')
         		this.location = 'Study_Library';
-
     };
 
     /**
@@ -198,7 +201,7 @@ var Player = (function(){
     *                  id: unique player identifier
     **/
     player.getPlayer = function(){
-        return {name: this.name, Character: this.character, playerId: this.id}; 
+        return {name: this.name, character: this.character, id: this.id}; 
     };
 
     return player;
