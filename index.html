@@ -261,7 +261,7 @@
         Ballroom_Kitchen : ['Ballroom', 'Kitchen'] 
     }
 
-    return validMoves[currentLocation].indexOf(targetLocation.id) != -1;
+    return (validMoves[currentLocation] && validMoves[currentLocation].indexOf(targetLocation.id) != -1);
   }
 
     /**

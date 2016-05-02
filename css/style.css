@@ -147,14 +147,14 @@ canvas#Kitchen {
 }
 
 #gameBoardContainer canvas.hallway.horizontal{
-	background: url("/img/gameBoard/hallway-horizontal.PNG");
+	background: url("/img/gameBoard/hallway-horizontal.png");
 	background-size: 100% 50%;
 	background-position: center;
   	background-repeat: no-repeat;
 }
 
 #gameBoardContainer canvas.hallway.vertical{
-	background: url("/img/gameBoard/hallway-vertical.PNG");
+	background: url("/img/gameBoard/hallway-vertical.png");
 	background-size: 50% 100%;
 	background-position: center;
   	background-repeat: no-repeat;
