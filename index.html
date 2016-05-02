@@ -14,12 +14,12 @@
     <form id="loginForm" action="">
       <input id="nameInput" required/><br>
       <select id="characterSelect" name="character">
-        <option value="Miss Scarlet">Miss Scarlet</option>
-        <option value="Colonel Mustard">Colonel Mustard</option>
-        <option value="Mrs. White">Mrs. White</option>
-        <option value="Mr. Green">Mr. Green</option>
-        <option value="Mrs. Peacock">Mrs. Peacock</option>
-        <option value="Professor Plum">Professor Plum</option>
+        <option value="MissScarlet">Miss Scarlet</option>
+        <option value="ColonelMustard">Colonel Mustard</option>
+        <option value="MrsWhite">Mrs. White</option>
+        <option value="MrGreen">Mr. Green</option>
+        <option value="MrsPeacock">Mrs. Peacock</option>
+        <option value="ProfessorPlum">Professor Plum</option>
       </select><br>
       <input type="submit" value="Login">
     </form>
@@ -73,6 +73,8 @@
       <br syle="lineBreak"/>
     </div>
     <script>
+    //Global playerData object;
+    var playerData;
 
     //Execute when the document and jQuery are ready
     $(function(){
@@ -100,54 +102,67 @@
       /**
       *Socket listener for server-sent event chatMessage
       **/
-      socket.on('playerConnection', function(playerData){
-        initiateLogin(playerData);
+      socket.on('playerConnection', function(data){
+        playerData = data;
+        initiateLogin();
       });
 
       /**
       *Socket listener for server-sent event playerLogin
       **/
       socket.on('playerLogin', function(player){
-        var validSnap = true;
         $('#loginModal').addClass('noDisplay');
         createCharacterNode(player.character);
+        socket.emit('triggerUpdate');    
 
         //Allows player to drag character
-        $('character[id="' + player.character + '"]').addClass('draggable');
-        $('character[id="' + player.character + '"]').draggable({
+        $('character#' + player.character).addClass('draggable');
+        $('character#' + player.character).draggable({
           containment: "#gameBoardContainer",
-          snap: "canvas.room",
+          snap: "canvas",
+          snapMode: "inner",
           stop: function (event, ui) {
-            //debugger;
-            var snapped = $(this).data('ui-draggable').snapElements;
-
-            /* Pull out only the snap targets that are "snapping": */
-            var snappedTo = $.map(snapped, function(element) {
-                return element.snapping ? element.item : null;
+            var possibleTargets = $('canvas').filter(function(index) {
+                return ($(this).offset().left <= ui.offset.left && $(this).offset().top <= ui.offset.top);
             });
 
-            var snappedObject = snappedTo[0];
 
-            if(snappedObject){
-              validSnap = true;
-              socket.emit('moveTo', player.character, snappedObject.id);
+            var currentPlayerData = playerData.filter(function (data){
+              return data.id == player.id;
+            })[0];
+
+            var target = possibleTargets[possibleTargets.length-1];
+
+            if(validMove(currentPlayerData.location, target)){
+              if(possibleTargets.length > 0 && target.id){
+                //if the target is a hallway then check to make sure it isn't occupied
+                if(target.id.indexOf('_') != -1){
+                  var occupiedLocation = playerData.filter(function (data){
+                    return data.location == target.id;
+                  });
+                  if(occupiedLocation.length == 0){
+                    socket.emit('moveTo', player.character, target.id);
+                  }
+                }
+                else{
+                  socket.emit('moveTo', player.character, target.id);
+                }
+              }
             }
             else{
-              validSnap = false;
-            }  
-          },
-          revert: "invalid"
+              alert('Please make a valid move');
+            }
+            socket.emit('triggerUpdate');
+          }
         });
-
-          socket.emit('triggerUpdate');
-        });
+      });
 
       /**
       *Socket listener for server-sent event updateBoard
       **/
-      socket.on('updateBoard', function(playerData){
+      socket.on('updateBoard', function(data){
         console.log('updating the game board');
-        updateGameBoard(playerData);
+        updateGameBoard(data);
       });
 
       /**
@@ -171,38 +186,39 @@
     **/
     function createCharacterNode(character) { 
       displayChatMessage(character + ' has been added to the board');
-      $('div#gameBoardContainer').prepend($('<character id="' + character +'"">').text(character));
+      $('div#gameBoardContainer').prepend($('<character id="' + character +'"">'));
     }
 
     /**
     *Creates the login screen and displays it to the user upon startup
     **/
-    function initiateLogin(playerData) {
-        if(playerData && playerData.length == 6){
-          $('#loginModal').addClass('noDisplay');
-          alert('The game room is currently full');
-        }
+    function initiateLogin() {
+      if(playerData && playerData.length == 6){
+        $('#loginModal').addClass('noDisplay');
+        alert('The game room is currently full');
+      }
 
-        else {
-          if(playerData){
-            //removes unavailable characters from dropdown nmenu
-            for(var i=0; i < playerData.length; i++){
-              $('select#characterSelect option[value="' + playerData[i].character + '"]').remove();
-            }
+      else {
+        if(playerData){
+          //removes unavailable characters from dropdown nmenu
+          for(var i=0; i < playerData.length; i++){
+            $('select#characterSelect option[value="' + playerData[i].character + '"]').remove();
           }
-          Custombox.open({
-            target: '#loginModal',
-            effect: 'fadein',
-            escKey: false,
-            overlayClose: false,
-          });
         }
+        Custombox.open({
+          target: '#loginModal',
+          effect: 'fadein',
+          escKey: false,
+          overlayClose: false,
+        });
+      }
     }
 
     /**
     *Update the location of the characters on the game board
     */
-    function updateGameBoard (playerData) {
+    function updateGameBoard (data) {
+      playerData = data;
       $.each(playerData, function(i, player){
           if($('character[id="' + player.character+'"]').length == 0){
             createCharacterNode(player.character);
@@ -216,10 +232,37 @@
     *Removes the player from the game board
     */
     function removePlayer (player) {
-        if($('character[id="' + player.character+'"]').length > 0){
-          $('character[id="' + player.character+'"]').remove();
+        if($('character#' + player.character).length > 0){
+          $('character#' + player.character).remove();
         }
     }
+    function validMove(currentLocation, targetLocation){
+      var validMoves = {
+        Study : ['Study_Hall', 'Study_Library', 'Kitchen'],
+        Hall : ['Study_Hall', 'Hall_Lounge', 'Hall_BilliardRoom'],
+        Lounge : ['Hall_Lounge', 'Lounge_DiningRoom', 'Conservatory'],
+        Library : ['Study_Library', 'Library_BilliardRoom', 'Library_Conservatory'],
+        BilliardRoom : ['Library_BilliardRoom', 'Hall_BilliardRoom', 'BilliardRoom_DiningRoom', 'BilliardRoom_Ballroom'],
+        DiningRoom : ['Lounge_DiningRoom', 'BilliardRoom_Dining', 'DiningRoom_Kitchen'],
+        Conservatory : ['Library_Conservatory', 'Conservatory_Ballroom', 'Lounge'],
+        Ballroom : ['Conservatory_Ballroom', 'BilliardRoom_Ballroom', 'Ballroom_Kitchen'],
+        Kitchen : ['Ballroom_Kitchen', 'DiningRoom_Kitchen', 'Study'],
+        Study_Hall : ['Study', 'Hall'],
+        Hall_Lounge : ['Hall', 'Lounge'],
+        Study_Library : ['Study', 'Library'],
+        Hall_BilliardRoom : ['Hall', 'BilliardRoom'],
+        Lounge_DiningRoom : ['Lounge', 'DiningRoom'],
+        Library_BilliardRoom : ['Library', 'BilliardRoom'],
+        BilliardRoom_DiningRoom : ['BilliardRoom', 'DiningRoom'],
+        Library_Conservatory : ['Library', 'Conservatory'],
+        BilliardRoom_Ballroom : ['BilliardRoom', 'Ballroom'] ,
+        DiningRoom_Kitchen :  ['DiningRoom', 'Kitchen'],
+        Conservatory_Ballroom : ['Conservatory', 'Ballroom'],
+        Ballroom_Kitchen : ['Ballroom', 'Kitchen'] 
+    }
+
+    return validMoves[currentLocation].indexOf(targetLocation.id) != -1;
+  }
 
     /**
     *Display the input message in the chat window

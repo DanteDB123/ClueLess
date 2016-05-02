@@ -16,74 +16,9 @@ var SERVER_IP_ADDRESS = process.env.OPENSHIFT_NODEJS_IP;
 var debug = true;
 
 var playerData = [];
-var locationData = {
-	Study : {
-		validMoves : ['Study_Hall', 'Study_Library', 'Kitchen']
-		},
-	Hall : {
-		validMoves : ['Study_Hall', 'Hall_Lounge', 'Hall_Billiard'] 
-		},
-	Lounge : {
-		validMoves : ['Hall_Lounge', 'Lounge_Dining', 'Conservatory'] 
-		},
-	Library : {
-		validMoves : ['Study_Library', 'Library_Billiard', 'Library_Conservatory'] 
-		},
-	Billiard : {
-		validMoves : ['Library_Billiard', 'Hall_Billiard', 'Billiard_Dining', 'Billard_Ballroom'] 
-		},
-	Dining : {
-		validMoves : ['Lounge_Dining', 'Billiard_Dining', 'Dining_Kitchen'] 
-		},
-	Conservatory : {
-		validMoves : ['Library_Conservatory', 'Conservatory_Ballroom', 'Lounge'] 
-		},
-	Ballroom : {
-		validMoves : ['Conservatory_Ballroom', 'Billiard_Ballroom', 'Ballroom_Kitchen'] 
-		},
-	Kitchen : {
-		validMoves : ['Ballroom_Kitchen', 'Dining_Kitchen', 'Study'] 
-		},
-	Study_Hall : {
-		validMoves : ['Study', 'Hall'] 
-		},
-	Hall_Lounge : {
-		validMoves : ['Hall', 'Lounge'] 
-		},
-	Study_Library : {
-		validMoves : ['Study', 'Library'] 
-		},
-	Hall_Billiard : {
-		validMoves : ['Hall', 'Billiard'] 
-		},
-	Lounge_Dining : {
-		validMoves : ['Lounge', 'Dining'] 
-		},
-	Library_Billiard : {
-		validMoves : ['Library', 'Billiard'] 
-		},
-	Billiard_Dining : {
-		validMoves : ['Billiard', 'Dining'] 
-		},
-	Library_Conservatory : {
-		validMoves : ['Library', 'Conservatory'] 
-		},
-	Billiard_Ballroom : {
-		validMoves : ['Billiard', 'Ballroom'] 
-		},
-	Dining_Kitchen : {
-		validMoves : ['Dining', 'Kitchen'] 
-		},
-	Conservatory_Ballroom : {
-		validMoves : ['Conservatory', 'Ballroom'] 
-		},
-	Ballroom_Kitchen : {
-		validMoves : ['Ballroom', 'Kitchen'] 
-		}
-}
 
 io.on('connection', function(socket){
-  print('a user connected');
+  print('a player connected');
   socket.emit('playerConnection', playerData);
 
   socket.on('message', function(msg){
@@ -125,13 +60,6 @@ io.on('connection', function(socket){
   	}
   });
 });
-
-/*Determine path to file depending if running from OpenShift server or locally
-if(process.env.OPENSHIFT_DATA_DIR)
-	app.use(express.static(process.env.OPENSHIFT_DATA_DIR));
-
-else
-	app.use(express.static(__dirname ));*/
 
 app.use(express.static(__dirname ));
 
@@ -187,17 +115,17 @@ var Player = (function(){
         this.character = character;
         this.id = playerData.length;
 
-        if(character == 'Miss Scarlet')
+        if(character == 'MissScarlet')
         		this.location = 'Hall_Lounge';
-        else if(character == 'Colonel Mustard')
+        else if(character == 'ColonelMustard')
         		this.location = 'Lounge_DiningRoom';
-        else if(character == 'Mrs. White')
+        else if(character == 'MrsWhite')
         		this.location = 'Ballroom_Kitchen';
-        else if(character == 'Mr. Green')
+        else if(character == 'MrGreen')
         		this.location = 'Conservatory_Ballroom';
-        else if(character == 'Mrs. Peacock')
+        else if(character == 'MrsPeacock')
         		this.location = 'Library_Conservatory';
-        else if(character == 'Professor Plum')
+        else if(character == 'ProfessorPlum')
         		this.location = 'Study_Library';
     };
 

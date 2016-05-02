@@ -34,7 +34,14 @@ div#gameBoardContainer{
 	position: relative;
     display: inline-flex;
 	width: 75vw;
-    height: 100vh;
+    height: 80vh;
+}
+
+.gameBoardColumn{
+	display: inline-block;
+	float: left;
+	height: 100%;
+	width: 20%;
 }
 
 div#chatContainer{
@@ -43,70 +50,6 @@ div#chatContainer{
     margin-left: auto;
 	width: 22vw;
     height: 100vh;
-}
-
-#gameBoardContainer canvas {
-	position: relative;
-    display: inline-flex;
-	width: 100%;
-	height: 15%;
-}
-
-#gameBoardContainer canvas.room {
-  	background-size: 100% 100%;
-  	opacity: .80;
-}
-
-canvas#Study {
-	background: url("/img/Study.png");
-}
-
-canvas#Library {
-	background: url("/img/Library.png");
-}
-
-canvas#Conservatory {
-	background: url("/img/Conservatory.png");
-}
-
-canvas#Hall {
-	background: url("/img/Hall.png");
-}
-
-canvas#BilliardRoom {
-	background: url("/img/BilliardRoom.png");
-}
-
-canvas#Ballroom {
-	background: url("/img/Ballroom.png");
-}
-
-canvas#Lounge {
-	background: url("/img/Lounge.png");
-}
-
-canvas#DiningRoom {
-	background: url("/img/DiningRoom.png");
-}
-
-canvas#Kitchen {
-	background: url("/img/Kitchen.png");
-}
-
-#gameBoardContainer canvas.hallway.horizontal{
-	background: url("/img/hallway-horizontal.png");
-	background-size: 100% 50%;
-	background-position: center;
-  	background-repeat: no-repeat;
-  	opacity: .75;
-}
-
-#gameBoardContainer canvas.hallway.vertical{
-	background: url("/img/hallway-vertical.png");
-	background-size: 50% 100%;
-	background-position: center;
-  	background-repeat: no-repeat;
-  	opacity: .75;
 }
 
 form#chatForm {
@@ -156,31 +99,99 @@ input#messageInput {
     align-items: flex-start;
     }
 
-/*.flex-item * {
-    -webkit-order: 0;
-    -ms-flex-order: 0;
-    order: 0;
-    -webkit-flex: 0 1 auto;
-    -ms-flex: 0 1 auto;
-    flex: 0 1 auto;
-    -webkit-align-self: auto;
-    -ms-flex-item-align: auto;
-    align-self: auto;
-}*/
-
-character{
-	position: absolute;
+#gameBoardContainer canvas {
+	position: relative;
     display: inline-flex;
-	width: 20% !important;
-	height: 15% !important;
-  	z-index: 3;
-  	font-size: 100%;
-  	vertical-align: middle;
-    text-align: center;
+	width: 100%;
+	height: 19%;
 }
-.gameBoardColumn{
-	display: inline-block;
-	float: left;
-	width: 20%;
-	height: 100%;
+
+#gameBoardContainer canvas.room {
+  	background-size: 100% 100%;
+}
+
+canvas#Study {
+	background: url("/img/gameBoard/Study.png");
+}
+
+canvas#Library {
+	background: url("/img/gameBoard/Library.png");
+}
+
+canvas#Conservatory {
+	background: url("/img/gameBoard/Conservatory.png");
+}
+
+canvas#Hall {
+	background: url("/img/gameBoard/Hall.png");
+}
+
+canvas#BilliardRoom {
+	background: url("/img/gameBoard/BilliardRoom.png");
+}
+
+canvas#Ballroom {
+	background: url("/img/gameBoard/Ballroom.png");
+}
+
+canvas#Lounge {
+	background: url("/img/gameBoard/Lounge.png");
+}
+
+canvas#DiningRoom {
+	background: url("/img/gameBoard/DiningRoom.png");
+}
+
+canvas#Kitchen {
+	background: url("/img/gameBoard/Kitchen.png");
+}
+
+#gameBoardContainer canvas.hallway.horizontal{
+	background: url("/img/gameBoard/hallway-horizontal.PNG");
+	background-size: 100% 50%;
+	background-position: center;
+  	background-repeat: no-repeat;
+}
+
+#gameBoardContainer canvas.hallway.vertical{
+	background: url("/img/gameBoard/hallway-vertical.PNG");
+	background-size: 50% 100%;
+	background-position: center;
+  	background-repeat: no-repeat;
+}
+
+div#gameBoardContainer character{
+	position: relative;
+    display: inline-flex;
+    width: 7.5% !important;
+    height: 7.5% !important;
+  	z-index: 3;
+  	vertical-align: middle;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    opacity: .75;
+}
+
+character#MissScarlet{
+	background: url("/img/cards/MissScarlet.png");
+}
+
+character#ColonelMustard{
+	background: url("/img/cards/ColonelMustard.png");
+}
+
+character#MrsWhite{
+	background: url("/img/cards/MrsWhite.png");
+}
+
+character#MrGreen{
+	background: url("/img/cards/MrGreen.png");
+}
+
+character#MrsPeacock{
+	background: url("/img/cards/MrsPeacock.png");
+}
+
+character#ProfessorPlum{
+	background: url("/img/cards/ProfessorPlum.png");
 }
