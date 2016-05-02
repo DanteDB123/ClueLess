@@ -126,7 +126,14 @@ io.on('connection', function(socket){
   });
 });
 
-app.use('/', express.static('./'));
+/*Determine path to file depending if running from OpenShift server or locally
+if(process.env.OPENSHIFT_DATA_DIR)
+	app.use(express.static(process.env.OPENSHIFT_DATA_DIR));
+
+else
+	app.use(express.static(__dirname ));*/
+
+app.use(express.static(__dirname ));
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
@@ -180,17 +187,17 @@ var Player = (function(){
         this.character = character;
         this.id = playerData.length;
 
-        if(character == 'Professor Schappelle')
+        if(character == 'Miss Scarlet')
         		this.location = 'Hall_Lounge';
-        else if(character == 'Professor Demasco')
-        		this.location = 'Lounge_Dining';
-        else if(character == 'Professor Garonzik')
+        else if(character == 'Colonel Mustard')
+        		this.location = 'Lounge_DiningRoom';
+        else if(character == 'Mrs. White')
         		this.location = 'Ballroom_Kitchen';
-        else if(character == 'Mr. Brock')
+        else if(character == 'Mr. Green')
         		this.location = 'Conservatory_Ballroom';
-        else if(character == 'Dean Schlesinger')
+        else if(character == 'Mrs. Peacock')
         		this.location = 'Library_Conservatory';
-        else if(character == 'Asst Dean Horn')
+        else if(character == 'Professor Plum')
         		this.location = 'Study_Library';
     };
 

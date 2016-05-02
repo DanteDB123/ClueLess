@@ -53,9 +53,44 @@ div#chatContainer{
 }
 
 #gameBoardContainer canvas.room {
-	background: url("/img/gameBoard.png");
   	background-size: 100% 100%;
   	opacity: .80;
+}
+
+canvas#Study {
+	background: url("/img/Study.png");
+}
+
+canvas#Library {
+	background: url("/img/Library.png");
+}
+
+canvas#Conservatory {
+	background: url("/img/Conservatory.png");
+}
+
+canvas#Hall {
+	background: url("/img/Hall.png");
+}
+
+canvas#BilliardRoom {
+	background: url("/img/BilliardRoom.png");
+}
+
+canvas#Ballroom {
+	background: url("/img/Ballroom.png");
+}
+
+canvas#Lounge {
+	background: url("/img/Lounge.png");
+}
+
+canvas#DiningRoom {
+	background: url("/img/DiningRoom.png");
+}
+
+canvas#Kitchen {
+	background: url("/img/Kitchen.png");
 }
 
 #gameBoardContainer canvas.hallway.horizontal{
