@@ -5,14 +5,15 @@
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="node_modules/custombox/src/css/custombox.css">
     <script src="//cdn.socket.io/socket.io-1.2.0.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.8.21/jquery-ui.min.js"></script>
     <script src="/node_modules/custombox/src/js/custombox.js"></script>
+    <script src="/node_modules/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
   </head>
   <body>
     <div id="loginModal" class="flex-container">
     <form id="loginForm" action="">
-      <input id="nameInput" required/><br>
+      <input id="nameInput" required><br>
       <select id="characterSelect" name="character">
         <option value="MissScarlet">Miss Scarlet</option>
         <option value="ColonelMustard">Colonel Mustard</option>
@@ -24,7 +25,10 @@
       <input type="submit" value="Login">
     </form>
     </div>
-
+    <div id="loaderContainer">
+      <div class="loader"></div>
+      <div class="loaderText">Waiting for additional players to join...</div>
+    </div>  
     <div id="mainContainer">
       <div id="gameBoardContainer" class="flex-container">
         <div id="gameColumn1" class="gameBoardColumn">
@@ -50,9 +54,9 @@
         </div>
         <div id="gameColumn4" class="gameBoardColumn">
           <canvas id="Hall_Lounge" class="hallway horizontal"></canvas>
-          <canvas></canvas>
+          <canvas id="accusationContainer"></canvas>
           <canvas id="BilliardRoom_DiningRoom" class="hallway horizontal"></canvas>
-          <canvas></canvas>
+          <canvas id="suggestionContainer"></canvas>
           <canvas id="Ballroom_Kitchen" class="hallway horizontal"></canvas>
         </div>
         <div id="gameColumn5" class="gameBoardColumn">
@@ -62,6 +66,8 @@
           <canvas id="DiningRoom_Kitchen" class="hallway vertical"></canvas>
           <canvas id="Kitchen" class="room"></canvas>
         </div>
+      </div>
+      <div id="cardContainer" class="flex-container">
       </div>
       <div id="chatContainer"  class="flex-container">
       <ul id="messages"></ul>
@@ -111,7 +117,11 @@
       *Socket listener for server-sent event playerLogin
       **/
       socket.on('playerLogin', function(player){
+        socket.player = player;
         $('#loginModal').addClass('noDisplay');
+        $("div#loaderContainer").css('opacity', '.8');
+        $("div#loaderContainer").show();
+
         createCharacterNode(player.character);
         socket.emit('triggerUpdate');    
 
@@ -155,6 +165,23 @@
             socket.emit('triggerUpdate');
           }
         });
+        socket.emit('checkToBeginGame');
+      });
+
+      /**
+      *Socket listener for server-sent event startGame
+      **/
+      socket.on('startGame', function(data){
+        $("div#loaderContainer").hide();
+        //displays the respective player's cards to the browser
+        $.each(data, function(i, player){
+          debugger;
+          if(player.id == socket.player.id){
+            socket.player = player;
+            displayCards(player);              
+          }
+        });
+        updateGameBoard(data);
       });
 
       /**
@@ -179,6 +206,11 @@
       socket.on('chatMessage', function(player, msg){
         displayChatMessage(player.name + ' : ' + msg);
       });
+
+      //Reposition the players when the game board is size is adjusted
+      $(window).resize(function(){
+        socket.emit('triggerUpdate');
+      });
     });
 
     /**
@@ -200,7 +232,7 @@
 
       else {
         if(playerData){
-          //removes unavailable characters from dropdown nmenu
+          //removes unavailable characters from dropdown menu
           for(var i=0; i < playerData.length; i++){
             $('select#characterSelect option[value="' + playerData[i].character + '"]').remove();
           }
@@ -209,7 +241,7 @@
           target: '#loginModal',
           effect: 'fadein',
           escKey: false,
-          overlayClose: false,
+          overlayClose: false
         });
       }
     }
@@ -223,9 +255,16 @@
           if($('character[id="' + player.character+'"]').length == 0){
             createCharacterNode(player.character);
           }
-          var position = $('#' + player.location).position();        
+          var position = $('#' + player.location).position();
+          var roomOccupancy = playerData.filter(function(index) {
+            return index.location == player.location;
+          });
+          position.left = ((roomOccupancy.indexOf(player)%3) * $('character[id="' + player.character+'"]').width()) + position.left ;
+          if(roomOccupancy.indexOf(player) > 2){
+            position.top = $('character[id="' + player.character+'"]').height()*1.5 + position.top;
+          }
           $('character[id="' + player.character +'"]').css({'top': position.top, 'left':position.left});
-        });
+      });
     }
 
     /**
@@ -236,6 +275,22 @@
           $('character#' + player.character).remove();
         }
     }
+
+    /** 
+    *Displays the player's cards
+    */
+    function displayCards (player) {
+      $.each(player.cards, function(i, card){
+        var cardNode = '<card id="' + card + '"></card>';
+        if($('card#' + card).length == 0){
+          $('div#cardContainer').append(cardNode);
+          $('card#' + card).css('background',  'url("/img/cards/' + card + '.png")');
+          $('card#' + card).css('background-size',  '100% 100%');
+          $('card#' + card).css('background-repeat',  'no-repeat');
+        } 
+      });
+    }
+
     function validMove(currentLocation, targetLocation){
       var validMoves = {
         Study : ['Study_Hall', 'Study_Library', 'Kitchen'],
@@ -243,7 +298,7 @@
         Lounge : ['Hall_Lounge', 'Lounge_DiningRoom', 'Conservatory'],
         Library : ['Study_Library', 'Library_BilliardRoom', 'Library_Conservatory'],
         BilliardRoom : ['Library_BilliardRoom', 'Hall_BilliardRoom', 'BilliardRoom_DiningRoom', 'BilliardRoom_Ballroom'],
-        DiningRoom : ['Lounge_DiningRoom', 'BilliardRoom_Dining', 'DiningRoom_Kitchen'],
+        DiningRoom : ['Lounge_DiningRoom', 'BilliardRoom_DiningRoom', 'DiningRoom_Kitchen'],
         Conservatory : ['Library_Conservatory', 'Conservatory_Ballroom', 'Lounge'],
         Ballroom : ['Conservatory_Ballroom', 'BilliardRoom_Ballroom', 'Ballroom_Kitchen'],
         Kitchen : ['Ballroom_Kitchen', 'DiningRoom_Kitchen', 'Study'],

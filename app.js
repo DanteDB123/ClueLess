@@ -34,6 +34,13 @@ io.on('connection', function(socket){
 	socket.emit('playerLogin', socket.player);
   });
 
+  socket.on('checkToBeginGame', function(){
+	if(playerData.length > 2){
+		distributeCards();
+		io.sockets.emit('startGame', playerData);
+	}
+  });
+
   socket.on('moveTo', function(character, location){
 	print('player ' + socket.player.name + ' has moved to the ' + location);
 	socket.player.location = location;
@@ -84,6 +91,39 @@ function updatePlayerData(data){
 }
 
 /**
+*Randomly distibute the cards to the players
+*/
+function distributeCards() {
+	var weaponList = ["Wrench", "Candlestick", "LeadPipe", "Rope", "Revolver", "Knife"];
+	var suspectList = ["MrsWhite", "ProfessorPlum", "MissScarlet", "MrGreen", "MrsPeacock", "ColonelMustard"];
+	var roomList = ["Conservatory", "Lounge", "Library", "Kitchen", "Ballroom", "Hall", "BilliardRoom", "Study", "DiningRoom"];
+
+	// Randomly choosing a weapon, suspect, and room to be the solution
+	var solutionWeapon = weaponList.splice(Math.floor(Math.random() * weaponList.length), 1);
+	var solutionSuspect = suspectList.splice(Math.floor(Math.random() * suspectList.length), 1);
+	var solutionRoom = roomList.splice(Math.floor(Math.random() * roomList.length), 1);
+
+
+	print('MurderMystery: ' + solutionSuspect  + ' with the ' + solutionWeapon + ' in the ' + solutionRoom);
+
+	// Put together the rest of the cards
+	var restOfCards = weaponList.concat(suspectList, roomList);
+
+	// Assign the cards randomly to the players
+	var playerId = 0;
+	while(restOfCards.length > 0){
+		var randomCard = restOfCards.splice(Math.floor(Math.random() * (restOfCards.length-1)), 1)[0];
+		playerData[playerId].cards.push(randomCard);
+		if(playerId < playerData.length-1){
+			playerId++;
+		}
+		else{
+			playerId = 0;
+		}
+	}
+}
+
+/**
 *Prints input message to the console
 *@param {String} msg - the message to be displayed
 *@param {Boolean} error - whether or not the message is an error
@@ -104,6 +144,7 @@ var Player = (function(){
     var character;
     var id;
     var location;
+    var cards;
 
     /**
     * Player Construtor
@@ -114,29 +155,20 @@ var Player = (function(){
         this.name = name;
         this.character = character;
         this.id = playerData.length;
+        this.cards = [];
 
         if(character == 'MissScarlet')
-        		this.location = 'Hall_Lounge';
+        	this.location = 'Hall_Lounge';
         else if(character == 'ColonelMustard')
-        		this.location = 'Lounge_DiningRoom';
+        	this.location = 'Lounge_DiningRoom';
         else if(character == 'MrsWhite')
-        		this.location = 'Ballroom_Kitchen';
+        	this.location = 'Ballroom_Kitchen';
         else if(character == 'MrGreen')
-        		this.location = 'Conservatory_Ballroom';
+        	this.location = 'Conservatory_Ballroom';
         else if(character == 'MrsPeacock')
-        		this.location = 'Library_Conservatory';
+        	this.location = 'Library_Conservatory';
         else if(character == 'ProfessorPlum')
-        		this.location = 'Study_Library';
-    };
-
-    /**
-    * Get Player
-    * @return {Object} name: name of the player
-    *                  character: the Character the player will be
-    *                  id: unique player identifier
-    **/
-    player.getPlayer = function(){
-        return {name: this.name, character: this.character, id: this.id}; 
+        	this.location = 'Study_Library';
     };
 
     return player;
