@@ -14,7 +14,7 @@
     <div id="loginModal" class="flex-container">
     <form id="loginForm" action="">
       <input id="nameInput" required><br>
-      <select id="characterSelect" name="character">
+      <select id="characterSelect" name="Character">
         <option value="MissScarlet">Miss Scarlet</option>
         <option value="ColonelMustard">Colonel Mustard</option>
         <option value="MrsWhite">Mrs. White</option>
@@ -25,9 +25,93 @@
       <input type="submit" value="Login">
     </form>
     </div>
+    <div id="accusationModal" class="flex-container modal">
+    <form id="accusationForm" action="">
+      <label for="accusationSuspectSelect">I suspect</label>
+      <select id="accusationSuspectSelect" name="suspect" required>
+        <option value="MissScarlet">Miss Scarlet</option>
+        <option value="ColonelMustard">Colonel Mustard</option>
+        <option value="MrsWhite">Mrs. White</option>
+        <option value="MrGreen">Mr. Green</option>
+        <option value="MrsPeacock">Mrs. Peacock</option>
+        <option value="ProfessorPlum">Professor Plum</option>
+      </select><br>
+      <label for="accusationWeaponSelect">with the</label>
+      <select id="accusationWeaponSelect" name="weapon" required>
+        <option value="Rope">Rope</option>
+        <option value="Pipe">Pipe</option>
+        <option value="Knife">Knife</option>
+        <option value="Wrench">Wrench</option>
+        <option value="Candlestick">Candlestick</option>
+        <option value="Revolver">Revolver</option>
+      </select><br>
+      <label for="accusationRoomSelect">in the</label>
+      <select id="accusationRoomSelect" name="room" required>
+        <option value="Study">Study</option>
+        <option value="Hall">Hall</option>
+        <option value="Lounge">Lounge</option>
+        <option value="Library">Library</option>
+        <option value="BilliardRoom">Billiard Room</option>
+        <option value="DiningRoom">Dining Room</option>
+        <option value="Conservatory">Conservatory</option>
+        <option value="Ballroom">Ballroom</option>
+        <option value="Kitchen">Kitchen</option>                 
+      </select><br>
+      <input type="submit" value="Accuse">
+    </form>
+    </div>
+    <div id="suggestionModal" class="flex-container modal">
+    <form id="suggestionForm" action="">
+      <label for="suggestionSuspectSelect">I suspect</label>
+      <select id="suggestionSuspectSelect" name="suspect" required>
+        <option value="MissScarlet">Miss Scarlet</option>
+        <option value="ColonelMustard">Colonel Mustard</option>
+        <option value="MrsWhite">Mrs. White</option>
+        <option value="MrGreen">Mr. Green</option>
+        <option value="MrsPeacock">Mrs. Peacock</option>
+        <option value="ProfessorPlum">Professor Plum</option>
+      </select><br>
+      <label for="suggestionWeaponSelect">with the</label>
+      <select id="suggestionWeaponSelect" name="weapon" required>
+        <option value="Rope">Rope</option>
+        <option value="Pipe">Pipe</option>
+        <option value="Knife">Knife</option>
+        <option value="Wrench">Wrench</option>
+        <option value="Candlestick">Candlestick</option>
+        <option value="Revolver">Revolver</option>
+      </select><br>
+      <label for="suggestionRoomSelect">in the</label>
+      <select id="suggestionRoomSelect" name="room" required>
+        <option value="Study">Study</option>
+        <option value="Hall">Hall</option>
+        <option value="Lounge">Lounge</option>
+        <option value="Library">Library</option>
+        <option value="BilliardRoom">Billiard Room</option>
+        <option value="DiningRoom">Dining Room</option>
+        <option value="Conservatory">Conservatory</option>
+        <option value="Ballroom">Ballroom</option>
+        <option value="Kitchen">Kitchen</option>                
+      </select><br>
+      <input type="submit" value="Suggest">
+    </form>
+    </div>
+    <div id="suggestionAnswerModal" class="flex-container modal">
+      <div id="suggestionAnswerText"></div>
+      <card id="suggestionAnswerCard"></card>
+      <button id="suggestionAnswerClose" class="close">Close</button>
+    </div>
+    <div id="accusationAnswerModal" class="flex-container modal">
+      <div id="accusationAnswerText"></div>
+      <card id="accusationAnswerSuspect"></card>
+      <card id="accusationAnswerWeapon"></card>
+      <card id="accusationAnswerRoom"></card>
+      <button id="restartGame">Restart Game</button>
+      <button id="accusationAnswerClose" class="close">Close</button>
+    </div>
     <div id="loaderContainer">
       <div class="loader"></div>
-      <div class="loaderText">Waiting for additional players to join...</div>
+      <div id="loaderText">Waiting for additional players to join...</div>
+      <button id="startGame">Start Game</button>
     </div>  
     <div id="mainContainer">
       <div id="gameBoardContainer" class="flex-container">
@@ -40,9 +124,9 @@
         </div>
         <div id="gameColumn2" class="gameBoardColumn">
           <canvas id="Study_Hall" class="hallway horizontal"></canvas>
-          <canvas></canvas>
+          <canvas id="makeSuggestionContainer"></canvas>
           <canvas id="Library_BilliardRoom" class="hallway horizontal"></canvas>
-          <canvas></canvas>
+          <canvas id="makeAccusationContainer"></canvas>
           <canvas id="Conservatory_Ballroom" class="hallway horizontal"></canvas>
         </div>
         <div id="gameColumn3" class="gameBoardColumn">
@@ -54,9 +138,9 @@
         </div>
         <div id="gameColumn4" class="gameBoardColumn">
           <canvas id="Hall_Lounge" class="hallway horizontal"></canvas>
-          <canvas id="accusationContainer"></canvas>
+          <canvas></canvas>
           <canvas id="BilliardRoom_DiningRoom" class="hallway horizontal"></canvas>
-          <canvas id="suggestionContainer"></canvas>
+          <canvas id="endTurnContainer"></canvas>
           <canvas id="Ballroom_Kitchen" class="hallway horizontal"></canvas>
         </div>
         <div id="gameColumn5" class="gameBoardColumn">
@@ -75,15 +159,21 @@
         <input id="messageInput" autocomplete="off" required/>
         <button class="submitMessage">Send</button>
       </form>
-      </div>
-      <br syle="lineBreak"/>
+      </div>  
+    </div>
+    <div id="buttonContainer">
+      <button id="endTurn">End Turn</button>
+      <button id="makeAccusation">Make Accusation</button>
+      <button id="makeSuggestion">Make Suggestion</button>
     </div>
     <script>
-    //Global playerData object;
+    //Global variables
     var playerData;
+    var gameStarted = false;
 
     //Execute when the document and jQuery are ready
     $(function(){
+      $('body').show();
       //Instantiate the socket object
       var socket = io();
     
@@ -99,10 +189,101 @@
       /**
       *Handles submit of login form
       **/
-      $('form#loginForm').submit(function(){
+      $('form#loginForm').submit(function(e){
+        e.preventDefault();
         socket.emit('login', $('input#nameInput').val(), $('select#characterSelect option:selected').val());
         Custombox.close();
         return false;
+      });
+
+      /**
+      *Handles click of the start game button
+      **/
+      $('button#startGame').click(function(){
+        socket.emit('checkToBeginGame', true);
+        return false;
+      });
+
+      /**
+      *Handles click of the make accusation button
+      **/
+      $('button#makeAccusation').click(function(){
+        Custombox.open({
+          target: '#accusationModal',
+          effect: 'fadein',
+          escKey: false,
+          overlayClose: false
+        });
+        return false;
+      });
+
+      /**
+      *Handles submit of accusation form
+      **/
+      $('form#accusationForm').submit(function(e){
+        e.preventDefault();
+        var cards = {
+          suspect : $('select#accusationSuspectSelect option:selected').val(),
+          weapon : $('select#accusationWeaponSelect option:selected').val(),
+          room : $('select#accusationRoomSelect option:selected').val()
+        }
+
+        Custombox.close();
+        socket.emit('makeAccusation', cards);
+        return false;
+      });
+
+      /**
+      *Handles click of the make suggestion button
+      **/
+      $('button#makeSuggestion').click(function(){
+        $('button#makeSuggestion').hide();
+        Custombox.open({
+          target: '#suggestionModal',
+          effect: 'fadein',
+          escKey: false,
+          overlayClose: false
+        });
+        return false;
+      });
+
+      /**
+      *Handles submit of suggestion form
+      **/
+      $('form#suggestionForm').submit(function(e){
+        e.preventDefault();
+        var cards = {
+          suspect : $('select#suggestionSuspectSelect option:selected').val(),
+          weapon : $('select#suggestionWeaponSelect option:selected').val(),
+          room : $('select#suggestionRoomSelect option:selected').val()
+        }
+        
+        Custombox.close();
+        socket.emit('makeSuggestion', cards);
+        return false;
+      });
+
+      /**
+      *Handles click of the suggestion answer close button
+      **/
+      $('button#.close').click(function(){
+        $(this).parent().hide();
+        return false;
+      });
+
+      /**
+      *Handles click of the end turn button
+      **/
+      $('button#endTurn').click(function(){
+        socket.emit('endTurn');
+        return false;
+      });
+
+      /**
+      *Handles click of the restart game button
+      **/
+      $('button#restartGame').click(function(){
+        window.location.reload()
       });
 
       /**
@@ -123,6 +304,10 @@
         $("div#loaderContainer").show();
 
         createCharacterNode(player.character);
+
+        if(player.character == socket.player.character){
+          $('character#' + player.character).addClass('myCharacter');
+        }
         socket.emit('triggerUpdate');    
 
         //Allows player to drag character
@@ -147,6 +332,7 @@
               if(possibleTargets.length > 0 && target.id){
                 //if the target is a hallway then check to make sure it isn't occupied
                 if(target.id.indexOf('_') != -1){
+                  $('button#makeSuggestion').hide();
                   var occupiedLocation = playerData.filter(function (data){
                     return data.location == target.id;
                   });
@@ -155,6 +341,9 @@
                   }
                 }
                 else{
+                  $("select#suggestionRoomSelect").val(target.id);  
+                  $("select#suggestionRoomSelect").attr('disabled', 'disabled');
+                  $('button#makeSuggestion').show();
                   socket.emit('moveTo', player.character, target.id);
                 }
               }
@@ -172,16 +361,27 @@
       *Socket listener for server-sent event startGame
       **/
       socket.on('startGame', function(data){
+        gameStarted = true;
+
         $("div#loaderContainer").hide();
+        $('button#makeSuggestion').hide();
+
         //displays the respective player's cards to the browser
         $.each(data, function(i, player){
-          debugger;
           if(player.id == socket.player.id){
             socket.player = player;
             displayCards(player);              
           }
         });
         updateGameBoard(data);
+
+        //Scarlet starts the game
+        /** TODO: player with lowest id starts game **/
+        var scarlet = {
+          character: 'Miss Scarlet',
+          id: 0
+        };
+        setPlayerTurn(socket.player, scarlet);
       });
 
       /**
@@ -198,6 +398,113 @@
       socket.on('removePlayer', function(player){
         console.log('removing ' + player.character + ' from the game board');
         removePlayer(player);
+      });
+
+      /**
+      *Socket listener for server-sent event startTurn
+      **/
+      socket.on('startTurn', function(nextPlayer){
+        console.log('It is now player ' + nextPlayer.character + '\'s turn');
+
+        setPlayerTurn(socket.player, nextPlayer);
+      });
+
+      /**
+      *Socket listener for server-sent event askSuggestion
+      **/
+      socket.on('askSuggestion', function(cards, player){
+        if(player.id == socket.player.id){
+          $("div#loaderContainer").hide();
+          var node;
+          var buttonContainer = [];
+
+          //********************* Display form field to answer suggestion **************************\\
+
+          var potentialAnswers = socket.player.cards.filter(function(playerCard){
+            return playerCard == cards.suspect || playerCard == cards.weapon || playerCard == cards.room;
+          });
+
+          if(potentialAnswers.length > 0){
+            node = $('<div id="askSuggestion"><div id="askSuggestionText">Please select one of the cards to answer the suggestion</div></div>');
+            for(var i = 0; i < potentialAnswers.length; i++){
+              var button = $('<button class="askSuggestionButton" value="' + potentialAnswers[i] + '"></button>'); 
+              button.css('background',  'url("/img/cards/' + potentialAnswers[i] + '.png")');
+              button.css('background-size',  '100% 100%');
+              button.css('background-repeat',  'no-repeat');
+              buttonContainer.push(button);
+              node.append(button);
+            }
+          }
+          else{
+            node = $('<div id="askSuggestion"><div id="askSuggestionText">You can not answer the suggestion</div></div>');
+            var button = $('<button class="close" value="">Close</button>'); 
+            buttonContainer.push(button);
+            node.append(button);
+          }
+
+          $("div#loaderContainer").after(node);
+          for(var i = 0; i < buttonContainer.length; i++){
+            buttonContainer[i].click(function(){
+              node.remove();
+              socket.emit('answerSuggestion', $(this).attr("value"));
+              console.log($(this).value);
+            });  
+          } 
+          node.show();    
+        }
+        else{
+          $("div#loaderText").text('Waiting for ' + player.character + ' to answer the suggestion');
+          $("div#loaderContainer").show();
+        }
+      });
+
+      /**
+      *Socket listener for server-sent event suggestionAnswer
+      **/
+      socket.on('suggestionAnswer', function(card, suggestion){
+        if(card){
+          console.log('sugestion answered');
+          $('card#suggestionAnswerCard').hide();
+
+          $('div#suggestionAnswerText').text('The suggestion that ' + suggestion.suggestor.character + ' did it with the ' + suggestion.cards.weapon + ' in the ' + suggestion.cards.room + ' was proven wrong.');
+
+          if(socket.player.id == suggestion.suggestor.id){
+            $('card#suggestionAnswerCard').css('background',  'url("/img/cards/' + card + '.png")');
+            $('card#suggestionAnswerCard').css('background-size',  '100% 100%');
+            $('card#suggestionAnswerCard').css('background-repeat',  'no-repeat');
+            $('card#suggestionAnswerCard').show();
+          }
+        }
+        else{
+          $('div#suggestionAnswerText').text('The suggestion that ' + suggestion.suggestor.character + ' did it with the ' + suggestion.cards.weapon + ' in the ' + suggestion.cards.room + ' could not be proven wrong.');
+        }
+        $('div#suggestionAnswerModal').show();
+      });
+
+      /**
+      *Socket listener for server-sent event endGame
+      **/
+      socket.on('endGame', function(player){
+        console.log(player.character +' has won the game');
+        $('div#accusationAnswerText').text(player.character +' has won the game!');
+        $('button#accusationAnswerClose').hide();
+        $('div#restartGame').show();
+        $('div#accusationAnswerModal').show();
+      });
+
+      /**
+      *Socket listener for server-sent event prohibitPlayerMovement
+      **/
+      socket.on('prohibitPlayerMovement', function(player){
+        console.log(player.character +' has made an incorrect accusation and can no longer make moves');
+        $('div#accusationAnswerText').text(player.character +' has made an incorrect accusation and can no longer make moves');
+        $('button#accusationAnswerClose').show();
+        $('div#restartGame').hide();
+        $('div#accusationAnswerModal').show();
+        if(socket.player.id == player.id){
+          $('div#loader').addClass('noDisplay');
+          $('div#loaderText').text('You are no longer able to move your character. Please stay around to answer suggestions');
+        } 
       });
 
       /**
@@ -247,10 +554,31 @@
     }
 
     /**
+    *Display the waiting screen when it isn't a player's turn
+    **/
+    function setPlayerTurn(player, nextPlayer){
+      if(player.id == nextPlayer.id){
+          $("div#loaderContainer").hide();
+      }
+      else{
+        $("div#loaderText").text('Waiting for ' + nextPlayer.character + ' to make a move');
+        $("div#loaderContainer").show();
+      }
+    }
+
+    /**
     *Update the location of the characters on the game board
     */
     function updateGameBoard (data) {
       playerData = data;
+
+      if(!gameStarted && playerData.length > 2){
+        $('button#startGame').show();
+      }
+      else{
+        $('button#startGame').hide();
+      }
+
       $.each(playerData, function(i, player){
           if($('character[id="' + player.character+'"]').length == 0){
             createCharacterNode(player.character);
@@ -263,8 +591,26 @@
           if(roomOccupancy.indexOf(player) > 2){
             position.top = $('character[id="' + player.character+'"]').height()*1.5 + position.top;
           }
-          $('character[id="' + player.character +'"]').css({'top': position.top, 'left':position.left});
+          $('character[id="' + player.character +'"]').css({'top': position.top, 'left': position.left});
       });
+
+      //set position of make suggestion button
+      var position = $('canvas#makeSuggestionContainer').position();
+      position.top += ($('canvas#makeSuggestionContainer').height()/2) - ($('button#makeSuggestion').height()/2);
+      position.left += ($('canvas#makeSuggestionContainer').width()/2) - ($('button#makeSuggestion').width()/2);
+      $('button#makeSuggestion').css({'top': position.top, 'left': position.left});
+
+      //set position of make accusation 
+      var position = $('canvas#makeAccusationContainer').position();
+      position.top += ($('canvas#makeAccusationContainer').height()/2) - ($('button#makeAccusation').height()/2);
+      position.left += ($('canvas#makeAccusationContainer').width()/2) - ($('button#makeAccusation').width()/2);
+      $('button#makeAccusation').css({'top': position.top, 'left': position.left});
+
+      //set position of end turn buttons
+      position = $('canvas#endTurnContainer').position();
+      position.top += ($('canvas#endTurnContainer').height()/2) - ($('button#endTurn').height()/2);
+      position.left += ($('canvas#endTurnContainer').width()/2) - ($('button#endTurn').width()/2);;
+      $('button#endTurn').css({'top': position.top, 'left': position.left});
     }
 
     /**
@@ -280,6 +626,7 @@
     *Displays the player's cards
     */
     function displayCards (player) {
+      $('div#cardContainer').empty();
       $.each(player.cards, function(i, card){
         var cardNode = '<card id="' + card + '"></card>';
         if($('card#' + card).length == 0){

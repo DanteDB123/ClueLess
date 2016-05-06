@@ -1,9 +1,36 @@
 body{
 	position: fixed; 
     overflow-y: scroll;
-    width: 100%;
+    display: none;
 }
 form input { border: 0; padding: 10px; margin-right: .5%; }
+
+input.makeAccuggation{
+	position: fixed;
+    top: 90%;
+  	margin-left: 37.5vw;
+  	transform: translate(-100%, -100%);
+	width: 20vw;
+	height: 10vh;
+	background-color: #2aa22a;
+	font-size: larger;
+  	font-weight: bold;
+  	color: #ffffff;
+  	text-align: center;
+  	display: none;
+	background-color:#35b128;
+	border:1px solid #33842a; /*same color as the background*/
+	font-size:1.6em;
+	/*set the border-radius at half the size of the width and height*/
+	-webkit-border-radius: 50px;
+	-moz-border-radius: 50px;
+	border-radius: 50px;
+	/*give the button a small drop shadow*/
+	-webkit-box-shadow: 0 0 10px rgba(0,0,0, .75);
+	-moz-box-shadow: 0 0 10px rgba(0,0,0, .75);
+	box-shadow: 2px 2px 15px rgba(0,0,0, .75);
+
+}
 #messages { 
 	list-style-type: none; 
  	overflow: auto;
@@ -39,9 +66,9 @@ div#gameBoardContainer{
 
 div#cardContainer{
 	position: relative;
-    display: inline-flex;
+  display: inline-flex;
 	width: 75vw;
-    height: 17.5vh;
+  height: 17.5vh;
 }
 
 .gameBoardColumn{
@@ -53,11 +80,11 @@ div#cardContainer{
 
 div#chatContainer{
 	position: fixed;
-    display: inline-flex;
-    margin-left: auto;
+  display: inline-flex;
+  margin-left: auto;
 	width: 22vw;
-    height: 100vh;
-    bottom: 0px;
+  height: 100vh;
+  bottom: 0px;
 }
 
 form#chatForm {
@@ -176,7 +203,14 @@ div#gameBoardContainer character{
   	vertical-align: middle;
     background-size: 100% 100%;
     background-repeat: no-repeat;
-    opacity: .75;
+    opacity: .9;
+}
+
+div#gameBoardContainer character.myCharacter:hover{
+	cursor:pointer;
+    opacity: 1;
+    width: 10% !important;
+    height: 10% !important;
 }
 
 character#MissScarlet{
@@ -203,21 +237,339 @@ character#ProfessorPlum{
 	background: url("/img/cards/ProfessorPlum.png");
 }
 
-
-div#cardContainer card{
+card{
 	position: relative;
-    display: inline-flex;
+  display: inline-flex;
 	width: 15%;
-    height: 100%;
+  height: 100%;
+}
+
+card#suggestionAnswerCard{
+	width: 20vw;
+	height: 25vh;
+	margin-right: 27.5vw;
+    margin-left: 27.5vw;
+}
+
+button.askSuggestionButton{
+  position: relative;
+  display: inline-flex;
+  width: 20vw;
+  height: 25vh;
+  margin-left: 27.5vw;
+  cursor:pointer;
+}
+
+button.close{
+	position: absolute;
+	width: 15vw;
+	height: 7.5vh;
+	left: 0px;
+	margin-left: 27.5vw;
+	cursor:pointer; /*forces the cursor to change to a hand when the button is hovered*/
+	padding:5px 10px; /*add some padding to the inside of the button*/
+	background:#f5100a; /*the color of the button*/
+	border:1px solid #33842a; /*required or the default border for the browser will appear*/
+	/*give the button curved corners, alter the size as required*/
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
+	/*give the button a drop shadow*/
+	-webkit-box-shadow: 0 0 4px rgba(0,0,0, .75);
+	-moz-box-shadow: 0 0 4px rgba(0,0,0, .75);
+	box-shadow: 0 0 4px rgba(0,0,0, .75);
+	/*style the text*/
+	color:#f3f3f3;
+	font-size:1em;
+}
+
+button.close:hover{
+    background-color :#c40b08; /*make the background a little darker*/
+    /*reduce the drop shadow size to give a pushed button effect*/
+    -webkit-box-shadow: 0 0 1px rgba(0,0,0, .75);
+    -moz-box-shadow: 0 0 1px rgba(0,0,0, .75);
+    box-shadow: 0 0 1px rgba(0,0,0, .75);
+}
+
+button#makeAccusation{
+	position: absolute;
+	width: 15vw;
+	height: 7.5vh;
+	cursor:pointer; /*forces the cursor to change to a hand when the button is hovered*/
+    padding:5px 10px; /*add some padding to the inside of the button*/
+    background:#FF9A00; /*the color of the button*/
+    border:1px solid #33842a; /*required or the default border for the browser will appear*/
+    /*give the button curved corners, alter the size as required*/
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    /*give the button a drop shadow*/
+    -webkit-box-shadow: 0 0 4px rgba(0,0,0, .75);
+    -moz-box-shadow: 0 0 4px rgba(0,0,0, .75);
+    box-shadow: 0 0 4px rgba(0,0,0, .75);
+    /*style the text*/
+    color:#f3f3f3;
+    font-size:1em;
+}
+
+button#makeAccusation:hover{
+    background-color :#e68a00; /*make the background a little darker*/
+    /*reduce the drop shadow size to give a pushed button effect*/
+    -webkit-box-shadow: 0 0 1px rgba(0,0,0, .75);
+    -moz-box-shadow: 0 0 1px rgba(0,0,0, .75);
+    box-shadow: 0 0 1px rgba(0,0,0, .75);
+}
+
+button#makeSuggestion{
+	position: absolute;
+	width: 15vw;
+	height: 7.5vh;
+	cursor:pointer; /*forces the cursor to change to a hand when the button is hovered*/
+    padding:5px 10px; /*add some padding to the inside of the button*/
+    background:#ffcc00; /*the color of the button*/
+    border:1px solid #33842a; /*required or the default border for the browser will appear*/
+    /*give the button curved corners, alter the size as required*/
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    /*give the button a drop shadow*/
+    -webkit-box-shadow: 0 0 4px rgba(0,0,0, .75);
+    -moz-box-shadow: 0 0 4px rgba(0,0,0, .75);
+    box-shadow: 0 0 4px rgba(0,0,0, .75);
+    /*style the text*/
+    color:#f3f3f3;
+    font-size:1em;
+}
+
+button#makeSuggestion:hover{
+    background-color :#e6b800; /*make the background a little darker*/
+    /*reduce the drop shadow size to give a pushed button effect*/
+    -webkit-box-shadow: 0 0 1px rgba(0,0,0, .75);
+    -moz-box-shadow: 0 0 1px rgba(0,0,0, .75);
+    box-shadow: 0 0 1px rgba(0,0,0, .75);
+}
+
+button#endTurn{
+	position: absolute;
+	width: 15vw;
+	height: 7.5vh;
+	cursor:pointer; /*forces the cursor to change to a hand when the button is hovered*/
+    padding:5px 10px; /*add some padding to the inside of the button*/
+    background:#f5100a; /*the color of the button*/
+    border:1px solid #33842a; /*required or the default border for the browser will appear*/
+    /*give the button curved corners, alter the size as required*/
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    /*give the button a drop shadow*/
+    -webkit-box-shadow: 0 0 4px rgba(0,0,0, .75);
+    -moz-box-shadow: 0 0 4px rgba(0,0,0, .75);
+    box-shadow: 0 0 4px rgba(0,0,0, .75);
+    /*style the text*/
+    color:#f3f3f3;
+    font-size:1em;
+}
+
+button#endTurn:hover{
+    background-color :#c40b08; /*make the background a little darker*/
+    /*reduce the drop shadow size to give a pushed button effect*/
+    -webkit-box-shadow: 0 0 1px rgba(0,0,0, .75);
+    -moz-box-shadow: 0 0 1px rgba(0,0,0, .75);
+    box-shadow: 0 0 1px rgba(0,0,0, .75);
+}
+
+
+button#startGame{
+	position: fixed;
+    top: 90%;
+  	margin-left: 50vw;
+  	transform: translate(-100%, -100%);
+	width: 20vw;
+	height: 10vh;
+	background-color: #2aa22a;
+	font-size: larger;
+  	font-weight: bold;
+  	color: #ffffff;
+  	text-align: center;
+  	display: none;
+	background-color:#35b128;
+	border:1px solid #33842a; /*same color as the background*/
+	font-size:1.6em;
+	/*set the border-radius at half the size of the width and height*/
+	-webkit-border-radius: 50px;
+	-moz-border-radius: 50px;
+	border-radius: 50px;
+	/*give the button a small drop shadow*/
+	-webkit-box-shadow: 0 0 10px rgba(0,0,0, .75);
+	-moz-box-shadow: 0 0 10px rgba(0,0,0, .75);
+	box-shadow: 2px 2px 15px rgba(0,0,0, .75);
+}
+
+button#startGame:hover{
+  background:#258e25;
+  border:1px solid #2d7425;
+  /*reduce the size of the shadow to give a pushed effect*/
+  -webkit-box-shadow: 0px 0px 5px rgba(0,0,0, .75);
+  -moz-box-shadow: 0px 0px 5px rgba(0,0,0, .75);
+  box-shadow: 0px 0px 5px rgba(0,0,0, .75);
+}
+
+div.modal{
+	position: absolute;
+	display: none;
+  	transition: opacity 0.3s, visibility 0.3s;
+  	background:#e8e8e8;
+    border: 1px solid #dadada;
+    font-family:sans-serif;
+    padding: 5px 10px 20px 20px;
+    z-index: 101;
 }
 
 #loaderContainer {
   width: 75vw;
-  height: 100vw;
-  background-color: lightblue;
+  height: 100vh;
+  background-color: #000000;
   position: absolute;
   z-index: 99;
-  opacity: 0;
+  display: none;
+}
+
+#askSuggestion{
+  width: 75vw;
+  height: 100vh;
+  background-color: #000000;
+  position: absolute;
+  z-index: 99;
+  display: none;
+  opacity: .95;
+}
+
+div#askSuggestionText{
+  font-size: larger;
+  font-weight: bold;
+  color: #fefefe;
+  z-index: 101;
+  text-align: center;
+  padding-top: 10vh;
+  padding-bottom: 10vh;
+  padding-left: 2em;
+  padding-right: 2em;
+}
+
+#suggestionAnswerModal{
+  width: 75vw;
+  height: 100vh;
+  padding-left: 0px;
+  padding-right: 0px;
+  background-color: #000000;
+  position: absolute;
+  z-index: 110;
+  opacity:	.95;
+  display: none;
+}
+
+div#suggestionAnswerText{
+  font-size: larger;
+  font-weight: bold;
+  color: #fefefe;
+  z-index: 111;
+  text-align: center;
+  padding-top: 10vh;
+  padding-bottom: 10vh;
+  padding-left: 2em;
+  padding-right: 2em;
+}
+
+button#suggestionAnswerClose{
+	position: absolute;
+	width: 15vw;
+	height: 7.5vh;
+	margin-top: 10vw;
+	margin-left: 30vw;
+    margin-right: 30vw;
+	cursor:pointer; /*forces the cursor to change to a hand when the button is hovered*/
+	padding:5px 10px; /*add some padding to the inside of the button*/
+	background:#f5100a; /*the color of the button*/
+	border:1px solid #33842a; /*required or the default border for the browser will appear*/
+	/*give the button curved corners, alter the size as required*/
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px;
+	/*give the button a drop shadow*/
+	-webkit-box-shadow: 0 0 4px rgba(0,0,0, .75);
+	-moz-box-shadow: 0 0 4px rgba(0,0,0, .75);
+	box-shadow: 0 0 4px rgba(0,0,0, .75);
+	/*style the text*/
+	color:#f3f3f3;
+	font-size:1em;
+}
+
+button#suggestionAnswerClose:hover{
+    background-color :#c40b08; /*make the background a little darker*/
+    /*reduce the drop shadow size to give a pushed button effect*/
+    -webkit-box-shadow: 0 0 1px rgba(0,0,0, .75);
+    -moz-box-shadow: 0 0 1px rgba(0,0,0, .75);
+    box-shadow: 0 0 1px rgba(0,0,0, .75);
+}
+
+div#accusationAnswerModal{
+  width: 75vw;
+  height: 100vh;
+  padding-left: 0px;
+  padding-right: 0px;
+  background-color: #000000;
+  position: absolute;
+  z-index: 999;
+  opacity:	.95;
+  display: none;
+}
+
+div#accusationAnswerText{
+  font-size: larger;
+  font-weight: bold;
+  color: #fefefe;
+  z-index: 111;
+  text-align: center;
+  padding-top: 10vh;
+  padding-bottom: 10vh;
+  padding-left: 2em;
+  padding-right: 2em;
+}
+
+button#restartGame{
+	position: fixed;
+    top: 90%;
+    left: 0px;
+  	margin-left: 50vw;
+  	transform: translate(-100%, -100%);
+	width: 20vw;
+	height: 10vh;
+	background-color: #2aa22a;
+	font-size: larger;
+  	font-weight: bold;
+  	color: #ffffff;
+  	text-align: center;
+  	display: none;
+	background-color:#35b128;
+	border:1px solid #33842a; /*same color as the background*/
+	font-size:1.6em;
+	/*set the border-radius at half the size of the width and height*/
+	-webkit-border-radius: 50px;
+	-moz-border-radius: 50px;
+	border-radius: 50px;
+	/*give the button a small drop shadow*/
+	-webkit-box-shadow: 0 0 10px rgba(0,0,0, .75);
+	-moz-box-shadow: 0 0 10px rgba(0,0,0, .75);
+	box-shadow: 2px 2px 15px rgba(0,0,0, .75);
+}
+
+button#restartGame:hover{
+  background:#258e25;
+  border:1px solid #2d7425;
+  /*reduce the size of the shadow to give a pushed effect*/
+  -webkit-box-shadow: 0px 0px 5px rgba(0,0,0, .75);
+  -moz-box-shadow: 0px 0px 5px rgba(0,0,0, .75);
+  box-shadow: 0px 0px 5px rgba(0,0,0, .75);
 }
 
 .loader {
@@ -238,12 +590,14 @@ div#cardContainer card{
   z-index: 100;
 }
 
-.loaderText {
+#loaderText {
   font-size: larger;
   font-weight: bold;
-  color: black;
+  color: #fefefe;
   z-index: 101;
   text-align: center;
+  padding-left: 2em;
+  padding-right: 2em;
 }
 
 @-webkit-keyframes load6 {

@@ -16,6 +16,8 @@ var SERVER_IP_ADDRESS = process.env.OPENSHIFT_NODEJS_IP;
 var debug = true;
 
 var playerData = [];
+var solution = {};
+var suggestion = {};
 
 io.on('connection', function(socket){
   print('a player connected');
@@ -34,8 +36,8 @@ io.on('connection', function(socket){
 	socket.emit('playerLogin', socket.player);
   });
 
-  socket.on('checkToBeginGame', function(){
-	if(playerData.length > 2){
+  socket.on('checkToBeginGame', function(buttonClicked){
+if(playerData.length > 2 && buttonClicked){
 		distributeCards();
 		io.sockets.emit('startGame', playerData);
 	}
@@ -47,6 +49,74 @@ io.on('connection', function(socket){
 	updatePlayerData(socket.player);
 	io.sockets.emit('updateBoard', playerData);
   });
+
+  socket.on('endTurn', function(){
+  	var nextPlayer = getNextPlayer(socket.player.id + 1);
+
+  	io.sockets.emit('startTurn', nextPlayer);
+  });
+
+   socket.on('makeAccusation', function(cards){
+	if(cards.suspect == solution.suspect && cards.weapon == solution.weapon && cards.room == solution.room){
+		print(socket.player.character + ' won the game');
+		io.sockets.emit('endGame', socket.player);
+	}
+	else{
+		print(socket.player.character + ' made an incorrect accusation and will no longer have a turn');
+		socket.player.prohibitTurn = true;
+		updatePlayerData(socket.player);
+		io.sockets.emit('prohibitPlayerMovement', socket.player);
+
+		var nextPlayer = getNextPlayer(socket.player.id + 1);
+  		io.sockets.emit('startTurn', nextPlayer);
+	}
+  });
+
+   socket.on('makeSuggestion', function(cards){
+   	suggestion.suggestor = socket.player;
+   	suggestion.cards = cards;
+	var nextPlayer = socket.player.id + 1;
+
+	var characterToMove = playerData.filter(function(player){
+		return player.character == cards.suspect;
+	})[0];
+	if(characterToMove){
+		characterToMove.location = cards.room;
+		updatePlayerData(characterToMove);
+		io.sockets.emit('updateBoard', playerData);
+	}
+
+	if(cards.suspect = solution.suspect && cards.weapon == solution.weapon && cards.room == solution.room){
+		print(socket.player.character + ' made a correct suggestion');
+		io.sockets.emit('suggestionAnswer', undefined, suggestion);
+	}
+	else{
+		nextPlayer = getNextPlayer(nextPlayer, true);
+		io.sockets.emit('askSuggestion', cards, nextPlayer);
+	}
+  });
+
+   socket.on('answerSuggestion', function(card){
+   	var nextPlayer;
+	if(card && (suggestion.cards.suspect == card || suggestion.cards.weapon == card || suggestion.cards.room == card)){
+		print(socket.player.character + ' proved the suggestion wrong with ' + card);
+
+		io.sockets.emit('suggestionAnswer', card, suggestion);
+
+		nextPlayer = getNextPlayer(suggestion.suggestor.id + 1);
+		io.sockets.emit('startTurn', nextPlayer);
+	}
+	else{
+		nextPlayer = getNextPlayer(socket.player.id + 1, true);
+		if (nextPlayer.id == suggestion.suggestor.id) {
+			io.sockets.emit('suggestionAnswer', undefined, suggestion);
+			io.sockets.emit('startTurn', nextPlayer);
+		}
+		else{
+			io.sockets.emit('askSuggestion', suggestion.cards, nextPlayer);
+		}
+	}
+  });   
 
   socket.on('triggerUpdate', function(){
   	io.sockets.emit('updateBoard', playerData);
@@ -99,17 +169,18 @@ function distributeCards() {
 	var roomList = ["Conservatory", "Lounge", "Library", "Kitchen", "Ballroom", "Hall", "BilliardRoom", "Study", "DiningRoom"];
 
 	// Randomly choosing a weapon, suspect, and room to be the solution
-	var solutionWeapon = weaponList.splice(Math.floor(Math.random() * weaponList.length), 1);
-	var solutionSuspect = suspectList.splice(Math.floor(Math.random() * suspectList.length), 1);
-	var solutionRoom = roomList.splice(Math.floor(Math.random() * roomList.length), 1);
+	solution.weapon = weaponList.splice(Math.floor(Math.random() * weaponList.length), 1);
+	solution.suspect = suspectList.splice(Math.floor(Math.random() * suspectList.length), 1);
+	solution.room = roomList.splice(Math.floor(Math.random() * roomList.length), 1);
 
 
-	print('MurderMystery: ' + solutionSuspect  + ' with the ' + solutionWeapon + ' in the ' + solutionRoom);
+	print('MurderMystery: ' + solution.suspect  + ' with the ' + solution.weapon + ' in the ' + solution.room);
 
 	// Put together the rest of the cards
 	var restOfCards = weaponList.concat(suspectList, roomList);
 
 	// Assign the cards randomly to the players
+	clearCards();
 	var playerId = 0;
 	while(restOfCards.length > 0){
 		var randomCard = restOfCards.splice(Math.floor(Math.random() * (restOfCards.length-1)), 1)[0];
@@ -121,6 +192,37 @@ function distributeCards() {
 			playerId = 0;
 		}
 	}
+}
+
+/**
+*Remove any existing cards
+**/
+function clearCards(){
+	for(var i = 0; i < playerData.length; i++){
+		playerData[i].cards = [];
+	}
+}
+
+function getNextPlayer(playerId, forAnsweringSuggestion) {
+	var nextPlayer;
+  	
+  	while(!nextPlayer){
+  		var potentialPlayer = playerData.filter(function(player){
+	  		return player.id == playerId;
+	  	});
+
+	  	if(potentialPlayer.length > 0 && (forAnsweringSuggestion || !potentialPlayer[0].prohibitTurn)){
+	  		nextPlayer = potentialPlayer[0];
+	  	}
+	  	else if(playerId > 4){
+	  		playerId = 0;
+	  	}
+	  	else{
+  			playerId++;
+	  	}
+	}
+
+	return nextPlayer;
 }
 
 /**
@@ -145,6 +247,7 @@ var Player = (function(){
     var id;
     var location;
     var cards;
+    var prohibitTurn;
 
     /**
     * Player Construtor
@@ -154,21 +257,33 @@ var Player = (function(){
     var player = function (name, character) {
         this.name = name;
         this.character = character;
-        this.id = playerData.length;
         this.cards = [];
+        this.prohibitTurn = false;
 
-        if(character == 'MissScarlet')
+        if(character == 'MissScarlet'){
+        	this.id = 0;
         	this.location = 'Hall_Lounge';
-        else if(character == 'ColonelMustard')
+        }
+        else if(character == 'ColonelMustard'){
+        	this.id = 1;
         	this.location = 'Lounge_DiningRoom';
-        else if(character == 'MrsWhite')
+        }
+        else if(character == 'MrsWhite'){
+        	this.id = 2;
         	this.location = 'Ballroom_Kitchen';
-        else if(character == 'MrGreen')
+        }
+        else if(character == 'MrGreen'){
+        	this.id = 3;
         	this.location = 'Conservatory_Ballroom';
-        else if(character == 'MrsPeacock')
+        }
+        else if(character == 'MrsPeacock'){
+        	this.id = 4;
         	this.location = 'Library_Conservatory';
-        else if(character == 'ProfessorPlum')
+        }
+        else if(character == 'ProfessorPlum'){
+        	this.id = 5;
         	this.location = 'Study_Library';
+        }
     };
 
     return player;
