@@ -39,7 +39,7 @@
       <label for="accusationWeaponSelect">with the</label>
       <select id="accusationWeaponSelect" name="weapon" required>
         <option value="Rope">Rope</option>
-        <option value="Pipe">Pipe</option>
+        <option value="LeadPipe">Lead Pipe</option>
         <option value="Knife">Knife</option>
         <option value="Wrench">Wrench</option>
         <option value="Candlestick">Candlestick</option>
@@ -74,7 +74,7 @@
       <label for="suggestionWeaponSelect">with the</label>
       <select id="suggestionWeaponSelect" name="weapon" required>
         <option value="Rope">Rope</option>
-        <option value="Pipe">Pipe</option>
+        <option value="LeadPipe">Lead Pipe</option>
         <option value="Knife">Knife</option>
         <option value="Wrench">Wrench</option>
         <option value="Candlestick">Candlestick</option>
@@ -283,7 +283,7 @@
       *Handles click of the restart game button
       **/
       $('button#restartGame').click(function(){
-        window.location.reload()
+        window.location.reload();
       });
 
       /**
@@ -317,6 +317,7 @@
           snap: "canvas",
           snapMode: "inner",
           stop: function (event, ui) {
+            if(socket.moveable){
             var possibleTargets = $('canvas').filter(function(index) {
                 return ($(this).offset().left <= ui.offset.left && $(this).offset().top <= ui.offset.top);
             });
@@ -338,6 +339,7 @@
                   });
                   if(occupiedLocation.length == 0){
                     socket.emit('moveTo', player.character, target.id);
+                    socket.moveable = false;
                   }
                 }
                 else{
@@ -345,13 +347,18 @@
                   $("select#suggestionRoomSelect").attr('disabled', 'disabled');
                   $('button#makeSuggestion').show();
                   socket.emit('moveTo', player.character, target.id);
+                  socket.moveable = false;
                 }
               }
             }
             else{
               alert('Please make a valid move');
             }
-            socket.emit('triggerUpdate');
+          }
+          else{
+              alert('Player is unable to move at this time');
+          }
+          socket.emit('triggerUpdate');
           }
         });
         socket.emit('checkToBeginGame');
@@ -360,7 +367,7 @@
       /**
       *Socket listener for server-sent event startGame
       **/
-      socket.on('startGame', function(data){
+      socket.on('startGame', function(data, firstPlayer){
         gameStarted = true;
 
         $("div#loaderContainer").hide();
@@ -375,13 +382,15 @@
         });
         updateGameBoard(data);
 
-        //Scarlet starts the game
-        /** TODO: player with lowest id starts game **/
-        var scarlet = {
-          character: 'Miss Scarlet',
-          id: 0
-        };
-        setPlayerTurn(socket.player, scarlet);
+        if(socket.player.id == firstPlayer.id){
+          $("div#loaderContainer").hide();
+          socket.moveable = true;
+        }
+        else{
+          $("div#loaderText").text('Waiting for ' + firstPlayer.character + ' to make a move');
+          $("div#loaderContainer").show();
+          socket.moveable = false;
+        }
       });
 
       /**
@@ -406,7 +415,15 @@
       socket.on('startTurn', function(nextPlayer){
         console.log('It is now player ' + nextPlayer.character + '\'s turn');
 
-        setPlayerTurn(socket.player, nextPlayer);
+        if(socket.player.id == nextPlayer.id){
+          $("div#loaderContainer").hide();
+          socket.moveable = true;
+        }
+        else{
+          $("div#loaderText").text('Waiting for ' + nextPlayer.character + ' to make a move');
+          $("div#loaderContainer").show();
+          socket.moveable = false;
+        }
       });
 
       /**
@@ -417,8 +434,6 @@
           $("div#loaderContainer").hide();
           var node;
           var buttonContainer = [];
-
-          //********************* Display form field to answer suggestion **************************\\
 
           var potentialAnswers = socket.player.cards.filter(function(playerCard){
             return playerCard == cards.suspect || playerCard == cards.weapon || playerCard == cards.room;
@@ -484,26 +499,30 @@
       /**
       *Socket listener for server-sent event endGame
       **/
-      socket.on('endGame', function(player){
+      socket.on('endGame', function(player, solution){
         console.log(player.character +' has won the game');
         $('div#accusationAnswerText').text(player.character +' has won the game!');
         $('button#accusationAnswerClose').hide();
-        $('div#restartGame').show();
+        $('button#restartGame').show();
+        showAccusationCards(solution);         
         $('div#accusationAnswerModal').show();
       });
 
       /**
       *Socket listener for server-sent event prohibitPlayerMovement
       **/
-      socket.on('prohibitPlayerMovement', function(player){
+      socket.on('prohibitPlayerMovement', function(player, cards){
         console.log(player.character +' has made an incorrect accusation and can no longer make moves');
-        $('div#accusationAnswerText').text(player.character +' has made an incorrect accusation and can no longer make moves');
+        $('div#accusationAnswerText').text(player.character +' has made the following incorrect accusation and can no longer make moves');
         $('button#accusationAnswerClose').show();
-        $('div#restartGame').hide();
+        $('button#restartGame').hide();
+        showAccusationCards(cards);
         $('div#accusationAnswerModal').show();
         if(socket.player.id == player.id){
           $('div#loader').addClass('noDisplay');
           $('div#loaderText').text('You are no longer able to move your character. Please stay around to answer suggestions');
+          socket.moveable = false;
+          socket.emit('endTurn');
         } 
       });
 
@@ -550,19 +569,6 @@
           escKey: false,
           overlayClose: false
         });
-      }
-    }
-
-    /**
-    *Display the waiting screen when it isn't a player's turn
-    **/
-    function setPlayerTurn(player, nextPlayer){
-      if(player.id == nextPlayer.id){
-          $("div#loaderContainer").hide();
-      }
-      else{
-        $("div#loaderText").text('Waiting for ' + nextPlayer.character + ' to make a move');
-        $("div#loaderContainer").show();
       }
     }
 
@@ -637,6 +643,29 @@
         } 
       });
     }
+
+    /** 
+    *Displays the accusation cards
+    */
+    function showAccusationCards (cards) {
+        //Suspect
+        $('card#accusationAnswerSuspect').css('background',  'url("/img/cards/' + cards.suspect + '.png")');
+        $('card#accusationAnswerSuspect').css('background-size',  '100% 100%');
+        $('card#accusationAnswerSuspect').css('background-repeat',  'no-repeat');
+        $('card#accusationAnswerSuspect').show();
+
+        //Weapon
+        $('card#accusationAnswerWeapon').css('background',  'url("/img/cards/' + cards.weapon + '.png")');
+        $('card#accusationAnswerWeapon').css('background-size',  '100% 100%');
+        $('card#accusationAnswerWeapon').css('background-repeat',  'no-repeat');
+        $('card#accusationAnswerWeapon').show(); 
+
+        //Room
+        $('card#accusationAnswerRoom').css('background',  'url("/img/cards/' + cards.room + '.png")');
+        $('card#accusationAnswerRoom').css('background-size',  '100% 100%');
+        $('card#accusationAnswerRoom').css('background-repeat',  'no-repeat');
+        $('card#accusationAnswerRoom').show();
+      }
 
     function validMove(currentLocation, targetLocation){
       var validMoves = {

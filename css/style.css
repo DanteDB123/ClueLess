@@ -91,20 +91,23 @@ form#chatForm {
     display:inline-flex;
     position: fixed; 
     bottom: .5%;
+    width: 23vw;
 }
 
 button.submitMessage {
 	display:inline-flex; 
     bottom: .5%;
-    width: 5%; 
     background: rgb(130, 224, 255); 
     border: none; 
-    padding: 10px;
+    padding-left: 5%;
+    padding-right: 5%;
+    width: 25%;
+    text-align: center;
 }
 
 input#messageInput {
 	display:inline-flex;
-	width: 90%;
+	width: 75%;
 	background: #e3e3e3;
 }
 
@@ -261,11 +264,11 @@ button.askSuggestionButton{
 }
 
 button.close{
-	position: absolute;
+	position: relative;
 	width: 15vw;
 	height: 7.5vh;
-	left: 0px;
-	margin-left: 27.5vw;
+	margin-left: 15vw;
+    margin-top: 10vh;
 	cursor:pointer; /*forces the cursor to change to a hand when the button is hovered*/
 	padding:5px 10px; /*add some padding to the inside of the button*/
 	background:#f5100a; /*the color of the button*/
@@ -513,15 +516,20 @@ button#suggestionAnswerClose:hover{
 }
 
 div#accusationAnswerModal{
-  width: 75vw;
+  width: 45vw;
   height: 100vh;
-  padding-left: 0px;
-  padding-right: 0px;
+  padding-left: 15vw;
+  padding-right: 15vw;
   background-color: #000000;
   position: absolute;
   z-index: 999;
   opacity:	.95;
   display: none;
+}
+
+div#accusationAnswerModal card{
+	width: 32.5%;
+	height: 32.5%;
 }
 
 div#accusationAnswerText{
@@ -537,10 +545,10 @@ div#accusationAnswerText{
 }
 
 button#restartGame{
-	position: fixed;
+	position: relative;
     top: 90%;
-    left: 0px;
-  	margin-left: 50vw;
+    margin-left: 32.5vw;
+    margin-top: 10vh;
   	transform: translate(-100%, -100%);
 	width: 20vw;
 	height: 10vh;

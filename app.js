@@ -37,9 +37,12 @@ io.on('connection', function(socket){
   });
 
   socket.on('checkToBeginGame', function(buttonClicked){
-if(playerData.length > 2 && buttonClicked){
+	if(playerData.length > 2 && buttonClicked){
 		distributeCards();
-		io.sockets.emit('startGame', playerData);
+
+		var firstPlayer = getNextPlayer(0);
+
+		io.sockets.emit('startGame', playerData, firstPlayer);
 	}
   });
 
@@ -59,16 +62,13 @@ if(playerData.length > 2 && buttonClicked){
    socket.on('makeAccusation', function(cards){
 	if(cards.suspect == solution.suspect && cards.weapon == solution.weapon && cards.room == solution.room){
 		print(socket.player.character + ' won the game');
-		io.sockets.emit('endGame', socket.player);
+		io.sockets.emit('endGame', socket.player, solution);
 	}
 	else{
 		print(socket.player.character + ' made an incorrect accusation and will no longer have a turn');
 		socket.player.prohibitTurn = true;
 		updatePlayerData(socket.player);
-		io.sockets.emit('prohibitPlayerMovement', socket.player);
-
-		var nextPlayer = getNextPlayer(socket.player.id + 1);
-  		io.sockets.emit('startTurn', nextPlayer);
+		io.sockets.emit('prohibitPlayerMovement', socket.player, cards);
 	}
   });
 
